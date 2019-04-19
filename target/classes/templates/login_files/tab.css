@@ -1,0 +1,158 @@
+/* Target Tabs */
+
+.tabs-target span:nth-of-type(1):not(:target) ~ span:nth-of-type(2):not(:target) ~ .tab:nth-of-type(1),
+.tabs-target span:nth-of-type(2):target ~ .tab:nth-of-type(2),
+.tabs-target span:nth-of-type(1):target ~ .tab:nth-of-type(3) {
+	display: block;
+}
+
+
+/* Checked Tabs */
+
+.tabs-checked input:nth-of-type(2):not(:checked) ~ input:nth-of-type(3):not(:checked) ~ .tab:nth-of-type(1),
+.tabs-checked input:nth-of-type(2):checked ~ .tab:nth-of-type(2),
+.tabs-checked input:nth-of-type(3):checked ~ .tab:nth-of-type(3) {
+	display: block;
+}
+
+
+/* Focus Tabs */
+
+.tabs-focus span.tab-link:nth-of-type(2):not(:focus) ~ span.tab-link:nth-of-type(3):not(:focus) ~ .tab:nth-of-type(3),
+.tabs-focus span.tab-link:nth-of-type(2):focus ~ .tab:nth-of-type(2),
+.tabs-focus span.tab-link:nth-of-type(3):focus ~ .tab:nth-of-type(1),
+.tabs-focus .tab:focus {
+	display: block;
+}
+
+.tabs-focus .tab:nth-of-type(1):focus ~ .tab:nth-of-type(3),
+.tabs-focus .tab:nth-of-type(2):focus ~ .tab:nth-of-type(3) {
+	display: none !important;
+}
+
+
+/* Hover Tabs */
+
+.tabs-hover .tab:nth-of-type(3),
+.tabs-hover span.tab-link:nth-of-type(2):hover ~ .tab:nth-of-type(2),
+.tabs-hover span.tab-link:nth-of-type(3):hover ~ .tab:nth-of-type(1),
+.tabs-hover .tab:hover {
+	display: block;
+}
+
+.tabs-hover span.tab-link:nth-of-type(2):hover ~ .tab:nth-of-type(3),
+.tabs-hover span.tab-link:nth-of-type(3):hover ~ .tab:nth-of-type(3),
+.tabs-hover .tab:nth-of-type(1):hover ~ .tab:nth-of-type(3),
+.tabs-hover .tab:nth-of-type(2):hover ~ .tab:nth-of-type(3) {
+	display: none !important;
+}
+
+
+/***********************************/
+
+.tab-area {
+	width: 100%;
+	float: left;
+	background: #2E506A;
+}
+
+.tab-area input {
+	display: none;
+}
+.tab-area label {
+    margin-bottom: 0px;
+    font-weight: normal;
+}
+.tab-link {
+    font-size: 15px;
+    cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    float: left;
+/*    width: 55px;*/
+    padding: 8px 20px;
+    text-align: center;
+    background: #2e506a;
+/*    border: 1px solid #bbb;*/
+    border-left: 0;
+    border-bottom: 0;
+}
+
+.tab-link:hover {
+	background: #eee;
+}
+
+.tab-link:nth-of-type(1) {
+/*	border-left: 1px solid #bbb;*/
+}
+
+.tab-link:hover {
+	color: #666;
+}
+
+.tab {
+	clear: both;
+	background: #fff;
+	padding: 15px;
+	display: none;
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    margin-top: 37px;
+}
+
+.target-fix {
+	display: block;
+	top: 0;
+	left: 0;
+	position: fixed;
+}
+
+@media only screen and (max-width: 1150px) {
+	.tab-area {
+		/*width: 46%;
+		margin: 2% 2% 5%;
+		float: left;*/
+	}
+}
+
+@media only screen and (max-width: 560px) {
+	.tab-area {
+		width: 100%;
+		margin: 0 0 5%;
+		float: left;
+	}
+	.intro {
+		margin: 50px 0;
+	}
+}
+
+.tabs-focus .tab-link:focus,
+.tabs-hover .tab-link:hover,
+#tabC:target ~ a:nth-of-type(3),
+#tabB:target ~ a:nth-of-type(2),
+#tabC:not(:target) ~ #tabB:not(:target) ~ a:nth-of-type(1),
+#tab-C:checked ~ label:nth-of-type(3),
+#tab-B:checked ~ label:nth-of-type(2),
+#tab-B:not(:checked) ~ #tab-C:not(:checked) ~ label:nth-of-type(1) {
+	background: #f9f9f9;
+	color: #000;
+}
+
+.tabs-focus .tab-link:focus:after,
+.tabs-hover .tab-link:hover:after,
+#tabC:target ~ a:nth-of-type(3):after,
+#tabB:target ~ a:nth-of-type(2):after,
+#tabC:not(:target) ~ #tabB:not(:target) ~ a:nth-of-type(1):after,
+#tab-C:checked ~ label:nth-of-type(3):after,
+#tab-B:checked ~ label:nth-of-type(2):after,
+#tab-B:not(:checked) ~ #tab-C:not(:checked) ~ label:nth-of-type(1):after {
+	position: absolute;
+	content: "";
+	margin: 5px 0 0 0;
+	width: 55px;
+	height: 1px;
+	display: none;
+	background: #ddd;
+}

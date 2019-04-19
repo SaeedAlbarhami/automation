@@ -1,0 +1,3692 @@
+﻿mrheapp.controller("timeLineController", function ($scope, $http) {
+    $scope.getTimeLineDetails = function (local) {
+        $http.get("/eservices/" + local + "/TimeLine/Index?_=" + new Date().getTime())
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getTimeLineDetails = response;
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (error) {
+                // register error in log
+                // errorMessage(error, local);
+            });
+    }
+
+    $scope.intializetimelinescript = function () {
+        $(".timelineItem").click(function (e) {
+            e.preventDefault();
+            $(".timelineDetailsInside").hide();
+            $("#" + $(this).data("rel")).fadeIn();
+        });
+
+        //$("a[class=timelineItemShowFirst]").data("rel").fadeIn();
+
+        $(".timelineItem").click(function () {
+            $(".timelineItem").removeClass("timelineItemActive");
+            $(this).addClass("timelineItemActive");
+        });
+
+        $(".timelineItem").click(function () {
+            $(".timelineItem").removeClass("timelineItemActive");
+            $(this).addClass("timelineItemActive");
+        });
+
+        $(".timelineItemCloseBut").click(function () {
+            $(".timelineDetailsInside").fadeOut("slow");
+        });
+        $(".timelineItemCloseBut").click(function (e) {
+            e.preventDefault();
+            $(".timelineItem").removeClass("timelineItemActive");
+        });
+    }
+});
+
+mrheapp.controller("dashboardController", function ($scope, $sce, $http) {
+    $scope.widgetActions = [];
+
+    $scope.renderPartialView = function (url, local, id, displayOrder) {
+        $http.get("/eservices/" + local + "/widgets/" + url)
+            .success(function (response) {
+                var item = {
+                    htmlWidget: $sce.trustAsHtml(response),
+                    Id: id,
+                    DisplayOrder: displayOrder
+                };
+                $scope.widgetActions.push(item);
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            });
+    }
+
+    var getDashboardDetails = $scope.getDashboardDetails = function (local) {
+        $http.get("/eservices/" + local + "/Dashboard/GetCurrentCustomerDashboard?_=" + new Date().getTime(), {
+            local: local
+        }).success(function (response) {
+            if (response.Success == true) {
+                $scope.getDashboardDetails = response;
+                // fill settings 
+
+                $("#EnableEmailNotifications").prop('checked', $scope.getDashboardDetails.Payload.Settings.EnableEmailNotifications);
+                $("#graytheme").prop('checked', $scope.getDashboardDetails.Payload.Settings.EnableGrayScale);
+                $("#mobilepushnotifications").prop('checked', $scope.getDashboardDetails.Payload.Settings.EnableMobilePushNotifications);
+                $("#enableSmsVerificationsOnLogin").prop('checked', $scope.getDashboardDetails.Payload.Settings.EnableSmsVerificationsOnLogin);
+                $("#ddlLanguage").val($scope.getDashboardDetails.Payload.Settings.LanguageCulture == "" || $scope.getDashboardDetails.Payload.Settings.LanguageCulture == "? undefined:undefined ?" ? "ar-AE" : $scope.getDashboardDetails.Payload.Settings.LanguageCulture);
+
+
+                var linkPopupshow = localStorage['linkaccountPopup'] ? JSON.parse(localStorage['linkaccountPopup']) : false;
+                if (response.Payload.IsLinked == false && response.Payload.MustLink && linkPopupshow) {
+                    localStorage.setItem("linkaccountPopup", false);
+                    $(".linkAccountOverlay").addClass("linkAccountOpen");
+                    $(".linkBtn").show();
+                }
+                else {
+                    $(".linkAccountOverlay").remove("linkAccountOpen");
+                    $(".linkBtn").hide();
+                }
+                $scope.widgetActions = [];
+                angular.forEach(response.PinnedWidgets, function (value, key) {
+                    $scope.renderPartialView(value.ActionUrl, local, value.Id, value.DisplayOrder);
+                });
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+        }).error(function (error) {
+            // errorMessage(error, local);
+        })
+            .finally(function () {
+                $(".loding_widgets").css("display", "none");
+
+            });
+    }
+
+    $scope.getCurrentCustomer = function (local) {
+        $http.get("/eservices/" + local + "/Dashboard/GetCurrentCustomer", {
+            local: local
+        }).success(function (response) {
+            if (response.Success == true) {
+                $scope.getCurrentCustomerRes = response;
+                $scope.getCurrentCustomerRes.serviceType = "";
+                $scope.getCurrentCustomerRes.pinCode = "";
+                //var linkPopupshow = localStorage['linkaccountPopup'] ? JSON.parse(localStorage['linkaccountPopup']) : false;
+                //if (response.IsLinked == false) {
+                //    if (response.Account_Linking_Token != null) {
+                //        localStorage.setItem("linkaccountPopup", false);
+                //        if (linkPopupshow)
+                //            $(".linkAccountOverlay").addClass("linkAccountOpen");
+                //        $(".linkBtn").show();
+                //    }
+                //    else {
+                //        $(".linkAccountOverlay").remove("linkAccountOpen");
+                //        $(".linkBtn").hide();
+                //    }
+
+                //}
+                //else {
+                //    $(".linkAccountOverlay").remove("linkAccountOpen");
+                //    $(".linkBtn").hide();
+                //}
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+        }).error(function (error) {
+            // errorMessage(error, local);
+        });
+    }
+
+    $scope.getMyIDLinkingPin = function (account_linking_token, applicationNo, serviceType, local) {
+        $http.post("/eservices/" + local + "/Dashboard/GetMyIDLinkingPin?_=" + new Date().getTime(), {
+            account_linking_token: account_linking_token,
+            applicationNo: applicationNo,
+            serviceType: serviceType,
+            local: local
+        }).success(function (response) {
+            $scope.getMyIDLinkingPinRes = response;
+            if (response.Success == true) {
+                $(".accLinkYesStepDotWrap .accLinkYesStepDotSt2").addClass("actAccLinkYesStepDot");
+                $("#accLinkStep1").hide();
+                $("#accLinkStep2").show();
+                $("#accLinkStep3").hide();
+                successMessage(response.Payload.Message, local);
+            } else {
+                errorMessage(response.Message, local);
+            }
+        }).error(function (error) {
+            // errorMessage(error, local);
+        });
+    }
+
+    $scope.completeMyIDLinking = function (account_linking_token, applicationNo, serviceType, pinCode, local) {
+        if (!$("#checkboxterms").is(":checked")) {
+            errorMessage(local == 'ar' ? "الرجاء الموافقة على  الشروط والاحكام" : "Please check the terms and conditions");
+            return;
+        } if (!$("#PinCode").val()) {
+            errorMessage(local == 'ar' ? "الرجاء ادخال رمز التحقق" : "Please enter your pin code");
+            return;
+        } else {
+            $http.post("/eservices/" + local + "/Dashboard/CompleteMyIDLinking?_=" + new Date().getTime(), {
+                account_linking_token: account_linking_token,
+                applicationNo: applicationNo,
+                serviceType: serviceType,
+                pinCode: pinCode,
+                local: local
+            }).success(function (response) {
+                $scope.completeMyIDLinkingRes = response;
+                if (response.Success == true) {
+                    $(".accLinkYesStepDotWrap .accLinkYesStepDotSt3").addClass("actAccLinkYesStepDot");
+                    $("#accLinkStep1").hide();
+                    $("#accLinkStep2").hide();
+                    $("#accLinkStep3").show();
+                    successMessage(response.Message, local);
+                } else {
+                    errorMessage(response.Message, local);
+                }
+            }).error(function (error) {
+                // errorMessage(error, local);
+            });
+        }
+    }
+
+    $scope.completeMyIDLinkingGuest = function (account_linking_token, local) {
+        if (!$("#checkboxtermsguest").is(":checked")) {
+            errorMessage("Please check the terms and conditions");
+
+        } else {
+            $http.post("/eservices/" + local + "/Dashboard/CompleteMyIDLinkingGuest?_=" + new Date().getTime(), {
+                account_linking_token: account_linking_token,
+                local: local
+            }).success(function (response) {
+                $scope.completeMyIDLinkingGuestRes = response;
+                if (response.Success == true) {
+                    getDashboardDetails(local);
+                    successMessage(response.Message, local);
+                    $("#linkaccountLink0").hide();
+                    $("#linkaccountLink1").hide();
+                    $("#linkaccountLink2").hide();
+                    $("#linkaccountLink3").show();
+                    $("#linkaccountLink4").hide();
+                    $.powerTour("run", 1);
+                } else {
+                    errorMessage(response.Message, local);
+                }
+            }).error(function (error) {
+                // errorMessage(error, local);
+            });
+        }
+    }
+    $scope.getLinkingToken = function (local) {
+        if ($scope.getCurrentCustomerRes.Account_Linking_Token) {
+            $scope.LinkingToken = $scope.getCurrentCustomerRes.Account_Linking_Token;
+        }
+        else {
+            $http.post("/eservices/" + local + "/Dashboard/GetLinkingToken?_=" + new Date().getTime()).success(function (response) {
+                if (response.Success == true) {
+                    $scope.LinkingToken = response.Payload.Token;
+
+                } else {
+                    errorMessage(response.Message, local);
+                }
+            }).error(function (error) {
+                // errorMessage(error, local);
+            });
+        }
+    }
+    $scope.pinUnPin = function (targetId, apiUri, local) {
+        var pinMessage = "";
+        if (local == "ar") {
+            pinMessage = "تمت معالجةالعملية بنجاح";
+        } else {
+            pinMessage = "Operation was done successfully";
+        }
+        $http.post("/eservices/" + local + "/Partial/PinUnPin/", {
+            targetId: targetId,
+            apiUri: apiUri
+        }).success(function (response) {
+            if (response.Success == true) {
+
+                var flagType = apiUri.indexOf("service");
+                if (flagType > -1) {
+                    $scope.getDashboardDetails.Services = response.Services;
+                    $scope.getDashboardDetails.PinnedServices = response.PinnedServices;
+                } else {
+                    $scope.widgetActions = [];
+                    $scope.getDashboardDetails.Widgets = response.Widgets;
+                    angular.forEach(response.PinnedWidgets, function (value, key) {
+                        $scope.renderPartialView(value.ActionUrl, local, value.Id, value.DisplayOrder);
+                    });
+                }
+            } else {
+                errorMessage(response.Message, local);
+                return;
+            }
+        }).error(function (error) {
+            // errorMessage(error, local);
+        })
+    }
+    var getUpdateProfile = $scope.getUpdateProfile = function (local) {
+        $http.get("/eservices/" + local + "/Partial/_GetUpdateProfile?_=" + new Date().getTime())
+            .success(function (response) {
+                if (response.Bank == '0')
+                    response.Bank = '';
+                $scope.postUpdateProfileRes = response;
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+    $scope.postUpdateProfile = function (postUpdateProfile, local, isContractor) {
+        var updateMessage = "";
+        if (local == "ar") {
+            updateMessage = "تم التعديل بنجاح";
+        } else {
+            updateMessage = "Modification was successfully done";
+        }
+        $http.post("/eservices/" + local + "/Partial/_PostUpdateProfile/", {
+            updateProfileModel: postUpdateProfile,
+            isContractor: isContractor
+        })
+            .success(function (response) {
+                if (response.Success == true) {
+                    successMessage(updateMessage, local);
+                } else {
+                    errorMessage(response.Message, local);
+                    $scope.postUpdateProfile(local);
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.postUpdateSettings = function (local) {
+        $scope.postUpdatepostUserSetting.EnableEmailNotifications = $("#EnableEmailNotifications").is(':checked');
+        $scope.postUpdatepostUserSetting.EnableGrayScale = $("#graytheme").is(':checked');
+        $scope.postUpdatepostUserSetting.EnableMobilePushNotifications = $("#mobilepushnotifications").is(':checked');
+        $scope.postUpdatepostUserSetting.EnableSmsVerificationsOnLogin = $("#enableSmsVerificationsOnLogin").is(':checked');
+        $scope.postUpdatepostUserSetting.LanguageCulture = $("#ddlLanguage").val();
+        var updateMessage = "";
+        if (local == "ar") {
+            updateMessage = "تم التعديل بنجاح";
+        } else {
+            updateMessage = "Modification was successfully done";
+        }
+        $http.post("/eservices/" + local + "/Partial/_PostSettings/", {
+            updateSettingsModel: $scope.postUpdatepostUserSetting
+        })
+            .success(function (response) {
+                $scope.postUpdateProfile = response;
+                successMessage(updateMessage, local);
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+
+
+    $scope.getPieChartProjects = function (local, filter) {
+        $http.get("/eservices/" + local + "/Widgets/_ContractorProjectsPieChartStatusJson?_=" + new Date().getTime())
+            .success(function (response) {
+                if (response.Success == true) {
+                    var parsed = JSON.parse(JSON.stringify(response.Payload));
+
+                    var arrData = []; var arrLabels = []; var arrColors = [];
+                    for (var x in parsed) {
+                        arrData.push(parsed[x].Count); arrLabels.push(parsed[x].Status);
+                        arrColors.push(parsed[x].Color);
+                    }
+                    $scope.getPieChartProjects.labels = arrLabels;
+                    $scope.getPieChartProjects.data = arrData; $scope.getPieChartProjects.colors = arrColors;
+                    $scope.getPieChartProjects.options = {
+                        responsive: true,
+                        legend: {
+                            display: true,
+                            position: "bottom",
+                            reverse: local == "ar" ? false : true,
+                            labels: {
+                                position: "right",
+                                align: "right",
+                                boxWidth: 15 //Width legend colorbox
+                            }
+                        },
+                    }
+                    $scope.showerrorProjects = { "display": "none" };
+                }
+                else {
+                    //errorMessage(response.Message, local);
+                    $scope.message = response.Message;
+                    $scope.showerrorProjects = { "display": "block" };
+                }
+
+            }).error(function (error) {
+                // errorMessage(error, local); 
+            });
+    }
+
+    $scope.getPieChartFinancial = function (local, filter) {
+        $http.get("/eservices/" + local + "/Widgets/_ContractorProjectsPieChartFinancialJson?_=" + new Date().getTime())
+            .success(function (response) {
+                if (response.Success == true) {
+                    var parsed = "";
+                    if (filter == 0) {
+                        parsed = JSON.parse(JSON.stringify(response.Payload));
+                        var arrProjects = [];
+                        var arrColors = [];
+                        var arrLabels = [];
+                        sumContractAmount = 0; sumLoanAmount = 0; sumOwnerShare = 0; sumRemainingPayment = 0; sumTotalPayment = 0; sumTotalRetentions = 0;
+                        for (var x in parsed) {
+                            arrProjects.push({ id: parsed[x]["Id"], name: parsed[x]["ApplicationNo"] + " - " + parsed[x]["Owner"] });
+                            sumContractAmount += parseFloat(parsed[x]["ContractAmount"]) || 0;
+                            sumLoanAmount += parseFloat(parsed[x]["LoanAmount"]) || 0;
+                            sumOwnerShare += parseFloat(parsed[x]["OwnerShare"]) || 0;
+                            sumRemainingPayment += parseFloat(parsed[x]["RemainingPayment"]) || 0;
+                            sumTotalPayment += parseFloat(parsed[x]["TotalPayment"]) || 0;
+                            sumTotalRetentions += parseFloat(parsed[x]["TotalRetentions"]) || 0;
+                        }
+                        arrColors.push((parsed[0]["ContractAmountColor"]));
+                        arrColors.push((parsed[0]["LoanAmountColor"]));
+                        arrColors.push((parsed[0]["OwnerShareColor"]));
+                        arrColors.push((parsed[0]["RemainingPaymentColor"]));
+                        arrColors.push((parsed[0]["TotalPaymentColor"]));
+                        arrColors.push((parsed[0]["TotalRetentionsColor"]));
+                        arrLabels.push((parsed[0]["ContractAmountLabel"]));
+                        arrLabels.push((parsed[0]["LoanAmountLabel"]));
+                        arrLabels.push((parsed[0]["OwnerShareLabel"]));
+                        arrLabels.push((parsed[0]["RemainingPaymentLabel"]));
+                        arrLabels.push((parsed[0]["TotalPaymentLabel"]));
+                        arrLabels.push((parsed[0]["TotalRetentionsLabel"]));
+
+                        $scope.getPieChartFinancial.projects = arrProjects;
+                        $scope.getPieChartFinancial.selectedProject = "0";
+                    } else {
+                        var resultFiltered = response.Payload.filter(function (obj) {
+                            return obj.Id == filter;
+                        });
+                        parsed = JSON.parse(JSON.stringify(resultFiltered));
+                        sumContractAmount = parseFloat(parsed[0]["ContractAmount"]) || 0;
+                        sumLoanAmount = parseFloat(parsed[0]["LoanAmount"]) || 0;
+                        sumOwnerShare = parseFloat(parsed[0]["OwnerShare"]) || 0;
+                        sumRemainingPayment = parseFloat(parsed[0]["RemainingPayment"]) || 0;
+                        sumTotalPayment = parseFloat(parsed[0]["TotalPayment"]) || 0;
+                        sumTotalRetentions = parseFloat(parsed[0]["TotalRetentions"]) || 0;
+                    }
+
+                    $scope.getPieChartFinancial.labels = arrLabels;
+                    $scope.getPieChartFinancial.data = [sumContractAmount, sumLoanAmount, sumOwnerShare, sumRemainingPayment, sumTotalPayment, sumTotalRetentions];
+                    $scope.getPieChartFinancial.colors = arrColors;
+
+                    $scope.getPieChartFinancial.options = {
+                        responsive: true,
+                        legend: {
+                            display: true,
+                            position: "bottom",
+                            reverse: local == "ar" ? false : true,
+                            labels: {
+                                boxWidth: 15 //Width legend colorbox
+                            }
+                        },
+                    }
+                    $scope.showerrorFinancial = { "display": "none" };
+                } else {
+                    //errorMessage(response.Message, local);
+                    $scope.message = response.Message;
+                    $scope.showerrorFinancial = { "display": "block" };
+                }
+            }).error(function (error) {
+                errorMessage(error, local);
+            });
+    }
+
+
+    $scope.getBarChartProjectCompletion = function (local, filter) {
+        $http.get("/eservices/" + local + "/Widgets/_ContractorProjectsPieChartCompletionJson?_=" + new Date().getTime())
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.showerrorProjectCompletion = { "display": "none" };
+                    var parsed = JSON.parse(JSON.stringify(response.Payload));
+                    var arrData = []; var arrColors = []; var arrLabels = [];
+                    for (var x in parsed) {
+                        arrData.push(parsed[x]["PercentageCompleted"]);
+                        arrColors.push("#" + (parsed[x]["ApplicationNo"] * 0089e6 << 0).toString(16));
+        arrLabels.push(parsed[x]["ApplicationNo"] + " - " + parsed[x]["Owner"]);
+    }
+    $scope.getBarChartProjectCompletion.labels = arrLabels; $scope.getBarChartProjectCompletion.data = arrData;
+    $scope.getBarChartProjectCompletion.colors = arrColors; $scope.getBarChartProjectCompletion.options = {
+        scales: { yAxes: [{ ticks: { min: 0, } }] }
+    }
+} else {
+        //errorMessage(response.Message, local);
+        $scope.message = response.Message;
+        $scope.showerrorProjectCompletion = { "display": "block" };
+    }
+            }).error(function (error) {
+        // errorMessage(error, local);
+    });
+    }
+
+});
+
+mrheapp.controller("housingServiceController", function ($scope, $http) {
+
+    $scope.getHousingServiceTicketInfo = function (ticketNo, local) {
+        $http.get("/eservices/" + local + "/HousingServiceRequest/GetHousingServiceTicketInfo?_=" + new Date().getTime() + "&ticketNo=" + ticketNo)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    if (response.Payload.JobStatus == "1") {
+                        $(".Employed").toggle(true);
+                    }
+                    else {
+                        $(".Employed").toggle(false);
+                    }
+
+                    /* start here 20_4_2017 */
+
+                    // if married  show spouse info
+                    if (response.Payload.SocialStatus == "2") {
+
+                        $(".socialStatusMarried").toggle(true);
+                    }
+                    else {
+                        $(".socialStatusMarried").toggle(false);
+                    }
+
+
+                    if (response.Payload.SupportingSupportTypeId == "3" || response.Payload.SupportingSupportTypeId == "8") {
+
+                        $(".govsupportAmount").toggle(true);
+                    }
+                    else {
+                        $(".govsupportAmount").toggle(false);
+                    }
+
+                    if (response.Payload.SocialStatus == "3" || response.Payload.SocialStatus == "4") {
+
+                        $(".DidyouhaveChildcustody").toggle(true);
+                    }
+                    else {
+                        $(".DidyouhaveChildcustody").toggle(false);
+                    }
+
+                    if (response.Payload.SpouseIsLocal) {
+                        $(".FWifemarriageDate").toggle(true);
+                    }
+                    else {
+                        $(".FWifemarriageDate").toggle(false);
+                    }
+
+                    if (response.Payload.IsApplyingForSecondWife) {
+                        $(".SWifemarriageDate").toggle(true);
+                    }
+                    else {
+                        $(".SWifemarriageDate").toggle(false);
+                    }
+                    checMarrageDateStatus();
+                    /* End here 20_4_2017 */
+
+
+                    $scope.getHousingServiceTicketInfo = response;
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.postHousingServiceTicketInfo = function (postHousingServiceTicketInfo, local, step) {
+
+        //For the love of God
+        //Let the API decide which documents are required
+        //Stop Checking documents and requring the user to enter all documents!
+
+        if (postHousingServiceTicketInfo.Payload.IsObligationOtpRequired && step == 5) {
+            $http.get("/eservices/" + local + "/HousingServiceRequest/GetRequiredAttachementsForTicket?_=" + new Date().getTime() + "&ticketNo=" + postHousingServiceTicketInfo.Payload.Ticket)
+                .success(function (responseAttachement) {
+                    getRequiredAttachementsForTicketRes = responseAttachement;
+                });
+            document.location.href = "/eservices/" + local + "/HousingServiceRequest/Obligationtobuild?_=" + new Date().getTime() + "&ticketNo=" + postHousingServiceTicketInfo.Payload.Ticket;
+
+        }
+
+        else {
+            if (step == 3)
+                $scope.getRequiredAttachementsForTicket(postHousingServiceTicketInfo.Payload.Ticket, local);
+            $http.post("/eservices/" + local + "/HousingServiceRequest/PostHousingServiceTicketInfo/", { postHousingServiceTicketInfo: postHousingServiceTicketInfo, step: step })
+                .success(function (response) {
+                    if (response.Success != true) {
+                        errorMessage(response.Message, local);
+                    }
+                    else {
+                        if (step == 5) {
+                            if (response.Message != null)
+                                successMessage(response.Message, local);
+                            document.location.href = "/eservices/" + local + "/HousingServiceRequest/ViewHousingServiceRequest";
+                        }
+                    }
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                })
+        }
+    }
+
+    $scope.deleteAttachementsForTicket = function (ticketNo, attachementId, local) {
+        $http.get("/eservices/" + local + "/HousingServiceRequest/DeleteAttachementsForTicket?_=" + new Date().getTime() + "&ticketNo=" + ticketNo + "&attachementId=" + attachementId)
+            .success(function (response) {
+                if (response.Message == null)
+                    response.Message = local == "ar" ? "لقد تم حذف المستند بنجاح" : "The document has been successfully deleted";
+                successMessage(response.Message, local);
+                $scope.getRequiredAttachementsForTicketRes = response;
+            }).error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.deleteHousingServiceRequestTicket = function (ticketNo, local) {
+        $http.get("/eservices/" + local + "/HousingServiceRequest/DeleteHousingServiceRequestTicket?_=" + new Date().getTime() + "&ticketNo=" + ticketNo)
+            .success(function (response) {
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                }
+                else {
+                    successMessage(response.Message, local);
+                    document.location.href = "/eservices/" + local + "/HousingServiceRequest/ViewHousingServiceRequest";
+                }
+                // $scope.getRequiredAttachementsForTicketRes = response;
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.viewAttachementsForTicket = function (ticketNo, attachementId, local) {
+        $http.get("/eservices/" + local + "/HousingServiceRequest/ViewAttachementForTicket?_=" + new Date().getTime() + "&ticketNo=" + ticketNo + "&attachementId=" + attachementId)
+            .success(function (response) {
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                }
+                else {
+                    $scope.ViewAttachementUrl = response.Payload;
+                    // $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    if (response.Payload.indexOf(".pdf") !== -1)
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    else
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button><img  src='" + response.Payload + "' alt='img' /> </div></div>");
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.LoadFileData = function (file, ticketNo, documentType, local) {
+
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        }
+        else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default: {
+                errorMessage(docValidAlert, local);
+                file.value = "";
+                return null;
+            }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+            formData.append("type", documentType);
+        }
+
+        $.ajax({
+            type: "POST",
+            crossDomain: true,
+            url: "/eservices/" + local + "/HousingServiceRequest/AttachDocumentRequest?_=" + new Date().getTime() + "&ticketNo=" + ticketNo + "&type=" + documentType,
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            mimeType: "multipart/form-data",
+            processData: false,
+            success: function (response) {
+                if (response.Success == true) {
+                    successMessage(response.Message, local);
+                    document.getElementsByClassName("close")[0].click();
+                    $scope.getRequiredAttachementsForTicket(ticketNo, local);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            },
+            error: function (error) {
+                // errorMessage(error, local);
+            }
+        });
+
+    }
+
+    $scope.getRequiredAttachementsForTicket = function (ticketNo, local) {
+        $http.get("/eservices/" + local + "/HousingServiceRequest/GetRequiredAttachementsForTicket?_=" + new Date().getTime() + "&ticketNo=" + ticketNo)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getRequiredAttachementsForTicketRes = response
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+
+
+    $scope.ValidateObligationSigniture = function (ticketNo, local) {
+        var otp = $("#Otp").val();
+
+        $http.post("/eservices/" + local + "/HousingServiceRequest/ValidateObligationSigniture?_=" + new Date().getTime() + "&ticketNo=" + ticketNo + "&otp=" + otp)
+            .success(function (response) {
+                if (response.Success) {
+
+                    successMessage(response.Message, local);
+                    // document.location.href = "/eservices/" + local + "/HousingServiceRequest/ViewHousingServiceRequest";
+
+                    var happinessUrl = "/eservices/" + local + "/happinessMeter/happinessMeter?_=" + new Date().getTime() + "&serviceCode=2597&transactionID=" + ticketNo;
+                    happenssMeter(happinessUrl, "/eservices/" + local + "/HousingServiceRequest/ViewHousingServiceRequest");
+
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+
+            })
+            .error(function (errordata) {
+                alert(errordata);
+            })
+    }
+
+    $scope.GetOTPValidateObligationSigniture = function (ticketNo, local) {
+        $http.get("/eservices/" + local + "/HousingServiceRequest/GetOTPValidateObligationSigniture?_=" + new Date().getTime() + "&ticketNo=" + ticketNo)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.OTPValidateObligationSigniture = response
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+});
+
+mrheapp.controller("PartialController", function ($scope, $http) {
+
+    $scope.DeleteNotification = function (notificationID, local) {
+        $http.get("/eservices/" + local + "/Partial/DeleteNotification?_=" + new Date().getTime() + "&notificationID=" + notificationID)
+            .success(function (response) {
+
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                }
+                else {
+                    var deleteMessage = response.Message;
+                    if (response.Message == "")
+                        if (local == "ar") {
+                            deleteMessage = "تم الحذف بنجاح";
+                        }
+                        else {
+                            deleteMessage = "Deleted successfully";
+                        }
+                    jQuery("#" + notificationID).parents(".notification_box").addClass("animated zoomOutLeft").delay(200).hide(1000);
+
+
+                    //successMessage(deleteMessage, local);
+                    // document.location.href = "/eservices/" + local + "/dashboard/index";
+                }
+            }).error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+});
+
+mrheapp.controller("ePayment", function ($scope, $http) {
+    $scope.getNewOPT = function (mPayAccount, applicationNo, paymentId, amount, securityTimeStamp, local) {
+        $http.post("/eservices/" + local + "/FinancialStatus/OverDuesResendOTP?_=" + new Date().getTime(), {
+            mPayAccount: mPayAccount,
+            applicationNo: applicationNo,
+            paymentId: paymentId,
+            amount: amount,
+            securityTimeStamp: securityTimeStamp
+        }).success(function (response) {
+            successMessage(response.Message, local);
+        }).error(function (error) {
+            // errorMessage(error, local);
+        })
+    }
+});
+
+mrhepublicapp.controller("publicController", function ($scope, $http) {
+    $scope.customerModel = {
+        UserName: "",
+        Password: "",
+        EmiratesId: "",
+        OtpCode: ""
+    };
+    $scope.ContractorLogin = function (LoginModel, local) {
+        NProgress.start();
+        $('#btnsubmitContractor').addClass("disabledBtn");
+        $('#btnsubmitContractorByotp').addClass("disabledBtn");
+        LoginModel.UserType = 2;
+        $http.post("/eservices/" + local + "/Account/Login?_=" + new Date().getTime(), {
+            model: LoginModel
+        }).success(function (response) {
+            $('#btnsubmitContractor').removeClass("disabledBtn");
+            $('#btnsubmitContractorByotp').removeClass("disabledBtn");
+            if (response.Success) {
+                window.location.href = "/eservices/" + local + "/Dashboard/Index";
+            }
+            else {
+                var userType = $("#UserType").val();
+                var message = response.Message == null ? response.error_description : response.Message;
+                $('#invalidLoginMessageDefault').html(message).show();
+                if (!$(".ContractorSigninWrapper").is(":visible"))
+                    $('#invalidLoginMessage').html(message).show();
+                $('#OtpSuccessMessage').html("").hide();
+            }
+            NProgress.inc(1);
+            NProgress.done();
+        }).error(function (error) {
+            // errorMessage(error, local);
+            $('#btnsubmitContractor').removeClass("disabledBtn");
+            $('#btnsubmitContractorByotp').removeClass("disabledBtn");
+            NProgress.inc(1);
+            NProgress.done();
+        }).finally(function () {
+            $('#btnsubmitContractor').removeClass("disabledBtn");
+            $('#btnsubmitContractorByotp').removeClass("disabledBtn");
+            NProgress.inc(1);
+            NProgress.done();
+
+        });
+    }
+    $scope.CustomerLogin = function (customerModel, local) {
+        NProgress.start();
+        customerModel.UserType = 1;
+        $('#btnsubmitCustomer').addClass("disabledBtn");
+        $('#btnsubmitCustomerByotp').addClass("disabledBtn");
+        $http.post("/eservices/" + local + "/Account/Login/", {
+            model: customerModel
+        }).success(function (response) {
+            $('#btnsubmitCustomer').removeClass("disabledBtn");
+            $('#btnsubmitCustomerByotp').removeClass("disabledBtn");
+            if (response.Success) {
+                localStorage.setItem('linkaccountPopup', true);
+                window.location.href = "/eservices/" + local + "/Dashboard/Index";
+            }
+            else {
+                var userType = $("#UserType").val();
+                var message = response.Message == null ? response.error_description : response.Message;
+                if (!$(".customerSigninWrapper").is(":visible"))
+                    $('#invalidCustomerLoginMessage').html(message).show();
+                $('#invalidCustomerLoginMessageDefault').html(message).show();
+                $('#OtpCustomerSuccessMessage').html("").hide();
+            }
+            NProgress.inc(1);
+            NProgress.done();
+        }).error(function (error) {
+            // errorMessage(error, local);
+            $('#btnsubmitCustomer').removeClass("disabledBtn");
+            $('#btnsubmitCustomerByotp').removeClass("disabledBtn");
+            NProgress.inc(1);
+            NProgress.done();
+        }).finally(function () {
+            $('#btnsubmitCustomer').removeClass("disabledBtn");
+            $('#btnsubmitCustomerByotp').removeClass("disabledBtn");
+            NProgress.inc(1);
+            NProgress.done();
+
+        });
+    }
+    $scope.generateOtp = function (local) {
+        NProgress.start();
+        var pinMessage = "";
+        var userName = $("#UserName").val();
+        var mobile = $("#Mobile").val();
+        $("#invalidLoginMessage").html("")
+        $("#Password").val();
+        if (local == "ar") {
+            otpMessage = "تمت معالجةالعملية بنجاح";
+        } else {
+            otpMessage = "Operation was done successfully";
+        }
+        $http.get("/eservices/" + local + "/Account/GenerateOtp?_=" + new Date().getTime() + "&userName=" + userName + "&mobile=" + mobile)
+            .success(function (response) {
+                if (response.Success == true) {
+                    //successMessage(otpMessage + " " + response.Message, local);
+                    //$(".numbertoggle").removeClass("numbertoggleOpen");
+                    $(".MobileNoBk").hide();
+                    $(".submitBtnMob").hide();
+                    $(".ContractorloginMobileNo").hide();
+                    $(".ContractorloginByOTP").hide();
+                    $("#msg_OtpCode").html("");
+                    $(".ContractorloginOtpNoWr").fadeIn();
+                    $(".OtpeBk").fadeIn();
+                    $(".submitCustomerBtn").fadeIn();
+                    $("#invalidCustomerLoginMessage").html("").hide();
+                    $("#OtpSuccessMessage").show().html(response.Message).show();
+                } else {
+                    errorMessage(response.Message, local);
+                    $("#invalidLoginMessage").show().html(response.Message);
+                    $('#OtpSuccessMessage').html("").hide();
+                    return;
+                }
+                NProgress.inc(1);
+                NProgress.done();
+            })
+            .error(function (errordata) {
+                errorMessage(response.Message, local);
+                $("#invalidLoginMessage").html(response.Message);
+                $('#OtpSuccessMessage').html("").hide();
+                NProgress.inc(1);
+                NProgress.done();
+            })
+            .finally(function () {
+                $(".loding_widgets").css("display", "none");
+                NProgress.inc(1);
+                NProgress.done();
+
+            });
+    }
+    $scope.generateOtpCustomer = function (local) {
+        NProgress.start();
+        var pinMessage = "";
+        var emiratesId = $("#EmiratesId").val();
+        $("#invalidCustomerLoginMessage").html("")
+        $("#Password").val();
+        if (local == "ar") {
+            otpMessage = "تمت معالجةالعملية بنجاح";
+        } else {
+            otpMessage = "Operation was done successfully";
+        }
+
+        $http.get("/eservices/" + local + "/Account/GenerateOtpForCustomer?_=" + new Date().getTime() + "&emiratesId=" + emiratesId)
+            .success(function (response) {
+                if (response.Success == true) {
+                    //successMessage(otpMessage + " " + response.Message, local);
+
+                    $("#OtpCustomerSuccessMessage").show().html(response.Message);
+                    $("#COtpCode").fadeIn();
+                    $("#msg_COtpCode").html("");
+                    $(".otpTextCusLab").fadeIn();
+                    $("#reOtp").fadeIn();
+                    $(".reOtp").fadeIn();
+                    $(".otpPasswordBackOtp").fadeIn();
+                    $(".EmiratesIDWrapper").hide();
+                    $(".otpPasswordBackOpen").hide();
+                    $("#btnsubmitCustomer").fadeIn();
+                    $(".submitCustomer").fadeIn();
+                    $(".submitBtn").hide();
+                    $(".OTPbk").hide();
+                    $(".EidBack").fadeIn();
+
+                } else {
+                    errorMessage(response.Message, local);
+
+                    $("#invalidCustomerLoginMessage").html(response.Message);
+
+                    return;
+                }
+                NProgress.inc(1);
+                NProgress.done();
+            })
+            .error(function (errordata) {
+                errorMessage(response.Message, local);
+                $("#invalidLoginMessage").html(response.Message);
+                NProgress.inc(1);
+                NProgress.done();
+            })
+            .finally(function () {
+                $(".loding_widgets").css("display", "none");
+                NProgress.inc(1);
+                NProgress.done();
+
+            });
+    }
+});
+
+mrheapp.controller("openNewProjectFileController", function ($scope, $http) {
+    $scope.getOpenNewProjectFile = function (local) {
+        var contractId = getUrlParameter("contractId");
+        $http.get("/eservices/" + local + "/ContractorOpenNewProjectFile/OpenNewProjectFileJson?_=" + new Date().getTime() + "&contractId=" + contractId)
+            .success(function (response) {
+                if (response.Success == true) {
+                    var parsed = "";
+                    $scope.getOpenNewProjectFile.model;
+                    $scope.getOpenNewProjectFile.billOfQuantityModel = ""
+                    $scope.getOpenNewProjectFile.billOfQuantityModel.totalBillOfQuantityPercentage = 0;
+                    $scope.getOpenNewProjectFile.postContractorEntryStatusModel = "";
+
+                    for (var i = 171; i > 0; i--) { $("#" + i + "CP").val(0); $("#" + i + "CN").val(""); }
+
+                    $("#wizard,.percentage_completed").show();
+                    var resultFiltered = response.Payload;
+
+                    var postContractorEntryStatusModel = $scope.contractorEntryStatus =
+                        {
+                            ContractorId: resultFiltered[0].ContractorId, ContractId: resultFiltered[0].Id,
+                            ApplicationNo: resultFiltered[0].ApplicationNo, ApplicantId: resultFiltered[0].ApplicantId,
+                            StatusId: 0, TransType: 3
+                        }
+                    parsed = JSON.parse(JSON.stringify(resultFiltered));
+                    $scope.getOpenNewProjectFile.model = parsed[0];
+
+                    $scope.getContractorEntryStatus(postContractorEntryStatusModel, local);
+                    $scope.showerror = { "display": "none" };
+                } else {
+                    errorMessage(response.Message, local);
+                    $scope.Message = response.Message;
+                    $scope.showerror = { "display": "block" };
+                    $("#wizard,.percentage_completed").hide();
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            });
+    }
+
+    $scope.getContractorEntryStatus = function (postContractorEntryStatusModel, local) {
+        $http.get("/eservices/" + local + "/ContractorOpenNewProjectFile/GetContractorEntryStatusJson?_=" + new Date().getTime() + "&contractId=" + postContractorEntryStatusModel.ContractId)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getOpenNewProjectFile.postContractorEntryStatusModel = response.Payload;
+
+                    $http.get("/eservices/" + local + "/ContractorOpenNewProjectFile/BillOfQuantityJson?_=" + new Date().getTime() + "&contractId=" + postContractorEntryStatusModel.ContractId)
+                        .success(function (response) {
+                            if (response.Success == true) {
+                                $scope.getOpenNewProjectFile.billOfQuantityModel = response.Payload;
+                                var totalBillOfQuantityPercentage = 0;
+                                for (var x in response.Payload) {
+                                    totalBillOfQuantityPercentage += parseFloat(response.Payload[x].ContractPercentage) || 0;
+                                    $("#" + response.Payload[x].WorkId + "CP").val(parseFloat(response.Payload[x].ContractPercentage));
+                                    $("#" + response.Payload[x].WorkId + "CN").val(response.Payload[x].Note);
+                                }
+                                $scope.getOpenNewProjectFile.billOfQuantityModel.totalBillOfQuantityPercentage = totalBillOfQuantityPercentage;
+                                $(".percentage_completed").fadeIn("slow");
+                            }
+                            else {
+                                errorMessage(response.Message, local);
+                            }
+                        })
+                    $scope.getRequiredAttachmentsForRequest(local, response.Payload.Id);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                    $("#wizard,.percentage_completed").hide();
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.deleteAttachmentsForRequest = function (requestNo, attachmentId, local) {
+        $http.get("/eservices/" + local + "/ContractorOpenNewProjectFile/DeleteAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId)
+            .success(function (response) {
+                local == "ar" ? docSucessAlert = "لقد تم اكمال العملية بنجاح" : docSucessAlert = "The process has been completed successfully";
+                if (response.Success) {
+                    $scope.getRequiredAttachementsForRequestRes = response;
+                    successMessage(docSucessAlert, local);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.viewAttachmentByIdForRequest = function (requestNo, attachmentId, local) {
+        $http.get("/eservices/" + local + "/ContractorOpenNewProjectFile/ViewAttachementByIdForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId)
+            .success(function (response) {
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                } else {
+                    $scope.ViewAttachementUrl = response.Payload;
+                    // $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    if (response.Payload.indexOf(".pdf") !== -1)
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    else
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button><img  src='" + response.Payload + "' alt='img' /> </div></div>");
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.loadFileData = function (file, requestNo, documentType, local) {
+
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        } else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default:
+                {
+                    errorMessage(docValidAlert, local);
+                    file.value = "";
+                    return null;
+                }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+            formData.append("type", documentType);
+        }
+
+        $.ajax({
+            type: "POST",
+            crossDomain: true,
+            url: "/eservices/" + local + "/ContractorOpenNewProjectFile/AttachDocumentRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&type=" + documentType,
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            mimeType: "multipart/form-data",
+            processData: false,
+            success: function (response) {
+                if (response.Success == true) {
+                    successMessage(response.Message, local);
+                    document.getElementsByClassName("close")[0].click();
+                    $scope.getRequiredAttachmentsForRequest(local, requestNo);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            },
+            error: function (error) {
+                errorMessage(error.responseText, local);
+            }
+        });
+
+    }
+
+    $scope.getRequiredAttachmentsForRequest = function (local, requestNo) {
+        $http.get("/eservices/" + local + "/ContractorOpenNewProjectFile/GetRequiredAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getRequiredAttachementsForRequestRes = response
+                } else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.postOpenNewProjectFile = function (getOpenNewProjectFile, local, id) {
+        var contractPercentage = $("#" + id + "CP").val() || 0;
+
+        var postbillOfQuantity = $scope.billOfQuantity = {
+            ContractId: getOpenNewProjectFile.model.Id,
+            WorkId: id, ContractPercentage: $("#" + id + "CP").val() || 0, Note: $("#" + id + "CN").val()
+        }
+        $http.post("/eservices/" + local + "/ContractorOpenNewProjectFile/PostBillOfQuantity?_=" + new Date().getTime(), {
+            billOfQuantityModel: postbillOfQuantity
+        }).success(function (response) {
+            if (response.Success != true) {
+                errorMessage(response.Message, local);
+            }
+        }).error(function (error) {
+            // errorMessage(error, local);
+        });
+    }
+
+    $scope.postOpenNewProjectFileSubmit = function (postContractorEntryStatusModel, local) {
+        postContractorEntryStatusModel.StatusId = 1;//submitted, no more changes
+        postContractorEntryStatusModel.Status = 1;
+        postContractorEntryStatusModel.CreatedDate = null;
+        postContractorEntryStatusModel.LastUpdated = null;
+        $http.post("/eservices/" + local + "/ContractorOpenNewProjectFile/PostContractorEntryStatus?_=" + new Date().getTime(), {
+            contractorEntryStatusModel: postContractorEntryStatusModel
+        }).success(function (response) {
+            if (response.Success == true) {
+                successMessage(response.Message, local);
+                window.location.href = "/eservices/" + local + "/ContractorOpenNewProjectFile/ViewProjectFileRequests";
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+        })
+    }
+});
+
+mrheapp.controller("projectPaymentController", function ($scope, $http) {
+    $scope.getProjectPayment = function (local) {
+        var contractId = getUrlParameter("contractId");
+        $http.get("/eservices/" + local + "/ContractorProjectPayment/GetContractorProjectsForPaymentJson?_=" + new Date().getTime() + "&statusId=" + 2)
+            .success(function (response) {
+                if (response.Success == true) {
+                    var parsed = "";
+                    $scope.getProjectPayment.model = "";
+                    $scope.getProjectPayment.billOfQuantityModel = ""
+                    $scope.getProjectPayment.billOfQuantityModel.totalBillOfQuantityPercentage = 0;
+
+                    $("#wizard,.percentage_completed").show();
+
+                    var resultFiltered = response.Payload.filter(function (obj) { return obj.Id == contractId; });
+
+                    parsed = JSON.parse(JSON.stringify(resultFiltered));
+
+                    $scope.getProjectPayment.model = parsed[0];
+
+                    $scope.getProjectPaymentHeader($scope.getProjectPayment.model, local);
+
+                    $scope.showerror = { "display": "none" };
+                }
+                else {
+                    errorMessage(response.Message, local);
+                    $scope.Message = response.Message;
+                    $scope.showerror = { "display": "block" };
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            });
+    }
+
+    $scope.getProjectPaymentHeader = function (model, local) {
+        $http.get("/eservices/" + local + "/ContractorProjectPayment/GetPaymentHeaderJson?_=" + new Date().getTime() + "&contractorId=" + model.ContractorId + "&contractId=" + model.Id)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel = response.Payload;
+                    $scope.getProjectPayment.billOfQuantityModel = response.Payload.Details;
+                    var totalBillOfQuantityPercentage = 0;
+                    $(".contract_Project_step_table tr").hide();
+                    for (var x in response.Payload.Details) {
+                        var workId = response.Payload.Details[x].WorkId;
+                        var contractPercentage = parseFloat(response.Payload.Details[x].ContractPercentage);
+                        var paymentPercentage = parseFloat(response.Payload.Details[x].PaymentPercentage) || parseFloat(response.Payload.Details[x].ActualDone);
+                        var actualDonePercentage = parseFloat(response.Payload.Details[x].ActualDone);
+                        $("#" + workId + "CP").closest("tr").show();
+                        $("#" + workId + "CP").val(contractPercentage);
+                        $("#" + workId + "PP").val(paymentPercentage);
+                        $("#" + workId + "APD").val(actualDonePercentage);
+                        $("#" + workId + "CN").val(response.Payload.Details[x].Note);
+                        totalBillOfQuantityPercentage += parseFloat(paymentPercentage) || 0;
+                    }
+
+                    $scope.getProjectPayment.billOfQuantityModel.totalBillOfQuantityPercentage = totalBillOfQuantityPercentage;
+
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel.TotalBillPaymentDisplay = response.Payload.TotalBillPaymentDisplay;
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel.TotalBillPayment = response.Payload.TotalBillPayment;
+
+                    $(".percentage_completed").fadeIn("slow");
+
+                    $scope.getRequiredAttachmentsForRequest(local, response.Payload.ContractorEntryId);
+
+                    //expand the deails
+                    $(".contracter_project_step_content .acc_content").addClass("acc_open");
+
+                    //calculate the current owner share
+                    ownerShare();
+                }
+                else {
+                    warningMessage(response.Message, local);
+                    $("#wizard,.percentage_completed").hide();
+                    $scope.getProjectPayment.warningMessage = response.Message;
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.getRequiredAttachmentsForRequest = function (local, requestNo) {
+        $http.get("/eservices/" + local + "/ContractorProjectPayment/GetRequiredAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getRequiredAttachementsForRequestRes = response
+                } else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (errordata) {
+                errorMessage(errordata);
+            })
+    }
+
+    $scope.loadFileData = function (file, requestNo, documentType, local) {
+
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        } else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default:
+                {
+                    errorMessage(docValidAlert, local);
+                    file.value = "";
+                    return null;
+                }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+            formData.append("type", documentType);
+        }
+
+        $.ajax({
+            type: "POST",
+            crossDomain: true,
+            url: "/eservices/" + local + "/ContractorOpenNewProjectFile/AttachDocumentRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&type=" + documentType,
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            mimeType: "multipart/form-data",
+            processData: false,
+            success: function (response) {
+                if (response.Success == true) {
+                    successMessage(response.Message, local);
+                    document.getElementsByClassName("close")[0].click();
+                    $scope.getRequiredAttachmentsForRequest(local, requestNo);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            },
+            error: function (error) {
+                errorMessage(error.responseText, local);
+            }
+        });
+
+    }
+
+    $scope.viewAttachmentByIdForRequest = function (requestNo, attachmentId, local) {
+        $http.get("/eservices/" + local + "/ContractorProjectPayment/ViewAttachementByIdForRequest?requestNo=" + requestNo + "&attachmentId=" + attachmentId)
+            .success(function (response) {
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                } else {
+                    $scope.ViewAttachementUrl = response.Payload;
+                    //$("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    if (response.Payload.indexOf(".pdf") !== -1)
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    else
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button><img  src='" + response.Payload + "' alt='img' /> </div></div>");
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.deleteAttachmentsForRequest = function (requestNo, attachmentId, local) {
+        $http.get("/eservices/" + local + "/ContractorProjectPayment/DeleteAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId)
+            .success(function (response) {
+                local == "ar" ? docSucessAlert = "لقد تم اكمال العملية بنجاح" : docSucessAlert = "The process has been completed successfully";
+                if (response.Success) {
+                    $scope.getRequiredAttachementsForRequestRes = response;
+                    successMessage(docSucessAlert, local);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.postProjectPayment = function (getProjectPayment, local, id) {
+        var paymentPercentage = $("#" + id + "PP").val() || 0;
+        var contractPercentage = $("#" + id + "CP").val() || 0;
+        var actualDone = $("#" + id + "APD").val() || 0;
+
+        if (parseInt(paymentPercentage) > parseInt(contractPercentage)) {
+            $("#" + id + "PP").focus(); $("#" + id + "PP").select();
+            warningMessage(local == "en" ? "The value must be less than or equal to the contrat percentage" : "القيمة المدخلة يجب ان تكون اقل من او تساوي نسبة العقد", local);
+            return;
+        }
+
+        if (parseInt(paymentPercentage) < parseInt(actualDone)) {
+            $("#" + id + "PP").focus(); $("#" + id + "PP").select();
+            warningMessage(local == "en" ? "The value must be greater than or equal to the actual done percentage" : "القيمة المدخلة يجب ان تكون اكثر من او تساوي النسبة المنجزة", local);
+            return;
+        }
+
+        $scope.details = {
+            Id: $scope.getProjectPayment.postProjectPaymentHeaderModel.Details.filter(function (obj) { return obj.WorkId == id; })[0].Id,
+            PaymentId: getProjectPayment.postProjectPaymentHeaderModel.Id,
+            ContractId: getProjectPayment.model.Id,
+            WorkId: id,
+            ContractPercentage: contractPercentage,
+            ActualDone: actualDone,
+            PaymentPercentage: paymentPercentage,
+            Note: $("#" + id + "CN").val() || ""
+        }
+        $http.post("/eservices/" + local + "/ContractorProjectPayment/PostProjectPaymentHeaderDetails?_=" + new Date().getTime(), {
+            projectPaymentHeaderDetailsModel: $scope.details
+        }).success(function (response) {
+            if (response.Success == true) {
+                $scope.getProjectPayment.postProjectPaymentHeaderModel.PercentageCompleted = response.InstancePaymentCalculation.PercentageCompleted;
+                $scope.getProjectPayment.postProjectPaymentHeaderModel.TotalBillPaymentDisplay = response.InstancePaymentCalculation.TotalBillPaymentDisplay;
+                $scope.getProjectPayment.postProjectPaymentHeaderModel.TotalBillPayment = response.InstancePaymentCalculation.TotalBillPayment;
+                $scope.getProjectPayment.postProjectPaymentHeaderModel.BillRetention = response.InstancePaymentCalculation.BillRetention;
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+
+        }).error(function (error) {
+            // errorMessage(error, local);
+        });
+    }
+
+    $scope.postPaymentOwner = function (paymentId, paymentOwner, local) {
+        $http.post("/eservices/" + local + "/ContractorProjectPayment/PostProjectPaymentHeaderOwner?_=" + new Date().getTime() + "&paymentId=" + paymentId + "&paymentOwner=" + paymentOwner)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel.PercentageCompleted = response.Payload.PercentageCompleted;
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel.TotalBillPayment = response.Payload.TotalBillPayment;
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel.TotalBillPaymentDisplay = response.Payload.TotalBillPaymentDisplay;
+                    $scope.getProjectPayment.postProjectPaymentHeaderModel.BillRetention = response.Payload.BillRetention;
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+            }).error(function (error) {
+                // errorMessage(error, local);
+            });
+    }
+
+    $scope.postProjectPaymentSubmit = function (postProjectPaymentHeaderModel, local) {
+        $scope.postContractorEntryStatusModel = {
+            Id: postProjectPaymentHeaderModel.ContractorEntryId,
+            ContractId: postProjectPaymentHeaderModel.ContractId,
+            ContractorId: postProjectPaymentHeaderModel.ContractorId,
+            StatusId: 1,
+            //TransType: parseFloat(calculatePercentage()) == 100 ? 4 : 6//changed made !!
+        }
+        $http.post("/eservices/" + local + "/ContractorProjectPayment/PostContractorEntryStatus_=" + new Date().getTime(), {
+            contractorEntryStatusModel: $scope.postContractorEntryStatusModel
+        }).success(function (response) {
+            if (response.Success == true) {
+                successMessage(response.Message, local);
+                window.location.href = "/eservices/" + local + "/ContractorProjectPayment/viewProjectPaymentrequests";
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+        })
+    }
+});
+
+mrheapp.controller("projectRetentionPaymentController", function ($scope, $http) {
+    $scope.getProjectRetentionPayment = function (local) {
+        var contractId = getUrlParameter("contractId");
+        $http.get("/eservices/" + local + "/ContractorRetentionPayment/GetContractorProjectsForRetentionPaymentJson?_=" + new Date().getTime() + "&statusId=" + 1)
+            .success(function (response) {
+                if (response.Success == true) {
+                    var parsed = "";
+                    $scope.getProjectRetentionPayment.model = "";
+
+                    $("#wizard").show();
+
+                    var resultFiltered = response.Payload.filter(function (obj) { return obj.Id == contractId; });
+
+                    parsed = JSON.parse(JSON.stringify(resultFiltered));
+
+                    $scope.getProjectRetentionPayment.model = parsed[0];
+
+                    $scope.getProjectRetentionPaymentHeader($scope.getProjectRetentionPayment.model, local);
+
+                    $scope.showerror = { "display": "none" };
+                }
+                else {
+                    errorMessage(response.Message, local);
+                    $scope.Message = response.Message;
+                    $scope.showerror = { "display": "block" };
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            });
+    }
+
+    $scope.getProjectRetentionPaymentHeader = function (model, local) {
+        $http.get("/eservices/" + local + "/ContractorRetentionPayment/GetPaymentRetentionHeaderJson?_=" + new Date().getTime() + "&contractId=" + model.Id)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getProjectRetentionPayment.postProjectRetentionPaymentHeaderModel = response.Payload;
+
+                    $scope.getRequiredAttachmentsForRequest(local, response.Payload.ContractorEntryId);
+
+                    //expand the deails
+                    $("#wizard").show();
+                }
+                else {
+                    errorMessage(response.Message, local);
+                    $("#wizard,.percentage_completed").hide();
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.getRequiredAttachmentsForRequest = function (local, requestNo) {
+        $http.get("/eservices/" + local + "/ContractorRetentionPayment/GetRequiredAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getRequiredAttachementsForRequestRes = response
+                } else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (errordata) {
+                errorMessage(errordata);
+            })
+    }
+
+    $scope.loadFileData = function (file, requestNo, documentType, local) {
+
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        } else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default:
+                {
+                    errorMessage(docValidAlert, local);
+                    file.value = "";
+                    return null;
+                }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+            formData.append("type", documentType);
+        }
+
+        $.ajax({
+            type: "POST",
+            crossDomain: true,
+            url: "/eservices/" + local + "/ContractorOpenNewProjectFile/AttachDocumentRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&type=" + documentType,
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            mimeType: "multipart/form-data",
+            processData: false,
+            success: function (response) {
+                if (response.Success == true) {
+                    successMessage(response.Message, local);
+                    document.getElementsByClassName("close")[0].click();
+                    $scope.getRequiredAttachmentsForRequest(local, requestNo);
+                }
+                else {
+                    errorMessage(response.message, local);
+                }
+            },
+            error: function (error) {
+                errorMessage(error.responseText, local);
+            }
+        });
+
+    }
+
+    $scope.viewAttachmentByIdForRequest = function (requestNo, attachmentId, local) {
+        $http.get("/eservices/" + local + "/ContractorRetentionPayment/ViewAttachementByIdForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId)
+            .success(function (response) {
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                } else {
+                    $scope.ViewAttachementUrl = response.Payload;
+                    //$("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    if (response.Payload.indexOf(".pdf") !== -1)
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    else
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button><img  src='" + response.Payload + "' alt='img' /> </div></div>");
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.deleteAttachmentsForRequest = function (requestNo, attachmentId, local) {
+        $http.get("/eservices/" + local + "/ContractorRetentionPayment/DeleteAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId)
+            .success(function (response) {
+                local == "ar" ? docSucessAlert = "لقد تم اكمال العملية بنجاح" : docSucessAlert = "The process has been completed successfully";
+                if (response.Success) {
+                    $scope.getRequiredAttachementsForRequestRes = response;
+                    successMessage(docSucessAlert, local);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.postPaymentOwner = function (paymentId, paymentOwner, local) {
+        $http.post("/eservices/" + local + "/ContractorProjectPayment/PostProjectPaymentHeaderOwner?_=" + new Date().getTime() + "&paymentId=" + paymentId + "&paymentOwner=" + paymentOwner)
+            .success(function (response) {
+                if (response.Success == true) {
+
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+            }).error(function (error) {
+                // errorMessage(error, local);
+            });
+    }
+
+    $scope.postProjectRetentionPaymentSubmit = function (postProjectRetentionPaymentHeaderModel, local) {
+        $scope.postContractorEntryStatusModel = {
+            Id: postProjectRetentionPaymentHeaderModel.ContractorEntryId,
+            ContractId: postProjectRetentionPaymentHeaderModel.ContractId,
+            ContractorId: postProjectRetentionPaymentHeaderModel.ContractorId,
+            StatusId: 1,
+            TransType: 4
+        }
+        $http.post("/eservices/" + local + "/ContractorRetentionPayment/PostContractorEntryStatus?_=" + new Date().getTime(), {
+            contractorEntryStatusModel: $scope.postContractorEntryStatusModel
+        }).success(function (response) {
+            if (response.Success == true) {
+                successMessage(response.Message, local);
+                window.location.href = "/eservices/" + local + "/ContractorRetentionPayment/ViewRetentionPaymentRequests";
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+        })
+    }
+});
+mrheapp.controller("RequestCertificatesController", function ($scope, $rootScope, $http) {
+    $scope.referenceNo = 0;
+    $scope.AllowEmirateIdManualEntry = false;
+    $scope.Validated = false;
+    $scope.Iscompleted = false;
+    $scope.CertificateRequest =
+        {
+            CertificateId: "",
+            Emirate: "",
+            TypeOfRequestParty: "",
+            RequestedBy: "",
+            Email: "",
+            MobileNo: "",
+            Name: "",
+            Edbarah: "",
+            UnifiedNo: "",
+            EmiratesId: "",
+            PassportNo: "",
+            Validated: false
+        };
+    $scope.getFinancialStatus = function (local) {
+        $http.get("/eservices/" + local + "/RequestCertificates/_GetFinancialStatus?_=" + new Date().getTime())
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getFinancialStatus = response;
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.PostLiabilityCertificates = function (financialStatusModel, local) {
+        $http.post("/eservices/" + local + "/RequestCertificates/PostLiabilityCertificates?_=" + new Date().getTime(), {
+            financialStatusModel: financialStatusModel
+        })
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.PostLiabilityCertificates = response;
+                    successMessage(response.Message, local);
+                    window.location = '/eservices/' + local + '/RequestCertificates/LiabilitySuccess?_=" + new Date().getTime() + "&msg=' + response.Message + '&trNo=' + response.Payload.ReferenceNo;
+
+
+                }
+                else {
+                    errorMessage(response.message, local);
+                }
+            })
+            .error(function (error) {
+                errorMessage(error.message, local);
+            })
+    }
+    $scope.GetVisualCaptcha = function (local, size) {
+        $http.get("/eservices/" + local + "/RequestCertificates/GetVisualCaptcha?_=" + new Date().getTime() + "&size=" + size)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.GetVisualCaptchaInfo = response;
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").hide();
+                }
+                else {
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").show();
+                    $('.ErrCaptcha').append(response.Message);
+
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.TryImageVisualCaptcha = function (local, questionId, imageKey) {
+        $("#ImageSelect").val(imageKey);
+        $http.get("/eservices/" + local + "/RequestCertificates/_TryImageVisualCaptcha?_=" + new Date().getTime() + "&questionId=" + questionId + "&imageKey=" + imageKey)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.TryImageVisualCaptchaInfo = response;
+
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").hide();
+                }
+                else {
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").append(response.Message);
+                    $(".ErrCaptcha").show();
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.TryAudioVisualCaptchaInfo = function (local, audioId, answer) {
+        $http.get("/eservices/" + local + "/RequestCertificates/_TryAudioVisualCaptcha?_=" + new Date().getTime() + "&audioId=" + audioId + "&answer=" + answer)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.TryAudioVisualCaptchaInfo = response;
+                    $(".ErrCaptcha").hide();
+                    $(".ErrCaptcha").empty();
+                }
+                else {
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").append(response.Message);
+                    $(".ErrCaptcha").show();
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.ListenAudio = function (local, audioId, el) {
+        $http.get("/eservices/" + local + "/RequestCertificates/_ListenAudio?_=" + new Date().getTime() + "&audioId=" + audioId)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.ListenAudioInfo = response;
+                    $scope.PlaySounds(el, response.Payload.AudioUrl);
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").hide();
+                }
+                else {
+                    $(".ErrCaptcha").append(response.Message);
+                    $(".ErrCaptcha").show();
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.PlaySounds = function (el, soundUrl) {
+
+        if (el.mp3) {
+            if (el.mp3.paused) el.mp3.play();
+            else el.mp3.pause();
+        } else {
+            el.mp3 = new Audio(soundUrl);
+            el.mp3.play();
+        }
+    }
+    $scope.SubmitToWhomitMayConcern = function (local) {
+        var questionId = $("#QuastionID").val();
+        var imageKey = $("#ImageSelect").val();
+        var audioID = $("#audioID").val();
+        var answer = $("#txtAnswer").val();
+
+
+
+        if (answer != "") {
+            $http.get("/eservices/" + local + "/RequestCertificates/_TryAudioVisualCaptcha?_=" + new Date().getTime() + "&audioId=" + audioId + "&answer=" + answer)
+                .success(function (response) {
+
+                    if (response.Success == true) { $("form").submit(); }
+                    else {
+                        $(".ErrCaptcha").empty();
+                        $(".ErrCaptcha").append(response.Message);
+                        $(".ErrCaptcha").show();
+                        $("#txtAnswer").val("");
+                    }
+
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                })
+            var resultAudio = $scope.TryAudioVisualCaptchaInfo(local, audioID, answer);
+            if (resultAudio.Success) { $("form").submit(); }
+            else {
+                $(".ErrCaptcha").empty();
+                $(".ErrCaptcha").append(response.Message);
+                $(".ErrCaptcha").show();
+            }
+        }
+        else {
+            $http.get("/eservices/" + local + "/RequestCertificates/_TryImageVisualCaptcha?_=" + new Date().getTime() + "&questionId=" + questionId + "&imageKey=" + imageKey)
+                .success(function (response) {
+
+                    if (response.Success == true) {
+                        $("form").submit();
+                    }
+                    else {
+                        $(".ErrCaptcha").empty();
+                        $(".ErrCaptcha").append(response.Message);
+                        $(".ErrCaptcha").show();
+                    }
+
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                })
+
+        }
+
+    }
+
+    //Certificate request
+    $scope.GetAllCertificateRequest = function (local, page, pageSize) {
+        $http.get("/eservices/" + local + "/RequestCertificates/_GetCertificatesRequest?_=" + new Date().getTime() + "&page=" + page + "&pageSize=" + pageSize)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    if (response.Payload.length == 0) {
+                        window.location.href = "/eservices/" + local + "/RequestCertificates/CertificateRequestSteps";
+                        return;
+                    }
+                    $scope.GetCertificateRequestInfo = response;
+                }
+                else {
+                    window.location.href = "/eservices/" + local + "/RequestCertificates/CertificateRequestSteps";
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.DeleteCertificateRequest = function (local, id) {
+        $http.delete("/eservices/" + local + "/RequestCertificates/_DeleteCertificatesRequest?_=" + new Date().getTime() + "&id=" + id)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.GetAllCertificateRequest(local, 0, 50);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.DeleteCertificateAttached = function (local, obj) {
+        var id = $(obj).attr("documentId");
+        $http.delete("/eservices/" + local + "/RequestCertificates/_DeleteCertificatesAttached?_=" + new Date().getTime() + "&requestId=" + $scope.referenceNo + "&id=" + id)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.deleteResponse = response;
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.CreateCertificateRequestByEmirate = function (file, local) {
+        NProgress.start();
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        }
+        else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default: {
+                errorMessage(docValidAlert, local);
+                file.value = "";
+                return null;
+            }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+        }
+        NProgress.inc(.40);
+        if ($scope.referenceNo == "" || $scope.referenceNo == 0) {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                url: "/eservices/" + local + "/RequestCertificates/_CreateCertificateRequestByFrontEmiratesId?_=" + new Date().getTime() + "&local=" + local,
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                mimeType: "multipart/form-data",
+                processData: false,
+                success: function (response) {
+                    if (response.Success == true) {
+                        var refNo = response.Payload.ReferenceNo;
+                        var allowEmirateIdManualEntry = response.Payload.AllowEmirateIdManualEntry;
+                        successMessage(response.Message, local);
+                        if (allowEmirateIdManualEntry) {
+                            $("#confirmEmirates").show();
+                        }
+                        else {
+                            $("#confirmEmirates").hide();
+                            $(file).attr("documentId", response.Payload.DocumentId);
+                            $("#referenceNo").val(refNo);
+                            $scope.AllowEmirateIdManualEntry = allowEmirateIdManualEntry;
+                            $scope.referenceNo = refNo;
+                            if (!$scope.$$phase)
+                                $scope.$apply();
+                            this.RequestInfo = response;
+                            $('#EmiratesBack, #Passport, #Passport2').prop("disabled", false);
+                            $('.dropify-wrapper.actJqStepUpload.disabled').removeClass("disabled");
+                        }
+
+                    }
+                    else {
+                        errorMessage(response.Message, local);
+                    }
+                    NProgress.inc(1);
+                    NProgress.done();
+                },
+                error: function (error) {
+                    NProgress.inc(1);
+                    NProgress.done();
+                    // errorMessage(error, local);
+                }
+            });
+        }
+        else {
+            $scope.AddAttachedToCertificateRequest(file, 1, local);
+        }
+    }
+    $scope.SubmitCertificate = function (local, EmiratesId, EMsg) {
+        if (!IsEmiratesIdValid(EmiratesId) || EmiratesId.trim().length <= 0) {
+            $('#msg_ConfirmEmirateId').html(EMsg).show();
+            return;
+        }
+        else $('#msg_ConfirmEmirateId').html('').hide();
+        var file = document.getElementById('EmiratesFront');
+        if (file.files.length == 0) {
+            $($("#EmiratesFront").parent()).removeClass("has-preview");
+            $($("#EmiratesFront").parent()).addClass("required-preview");
+            return;
+        }
+        else {
+            $($("#EmiratesFront").parent()).removeClass("required-preview");
+            $($("#EmiratesFront").parent()).addClass("has-preview");
+        }
+        NProgress.start();
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        }
+        else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default: {
+                errorMessage(docValidAlert, local);
+                file.value = "";
+                return null;
+            }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+        }
+        NProgress.inc(.40);
+        if ($scope.referenceNo == "" || $scope.referenceNo == 0) {
+
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                url: "/eservices/" + local + "/RequestCertificates/_CreateCertificateRequestByFrontEmiratesId?_=" + new Date().getTime() + "&emiratesId=" + EmiratesId + "&local=" + local,
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                mimeType: "multipart/form-data",
+                processData: false,
+                success: function (response) {
+                    if (response.Success == true) {
+                        var refNo = response.Payload.ReferenceNo;
+                        var allowEmirateIdManualEntry = response.Payload.AllowEmirateIdManualEntry;
+                        successMessage(response.Message, local);
+                        if (allowEmirateIdManualEntry) {
+                            $("#confirmEmirates").show();
+                        }
+                        else {
+                            $("#confirmEmirates").hide();
+                            $(file).attr("documentId", response.Payload.DocumentId);
+                            $("#referenceNo").val(refNo);
+                            $scope.AllowEmirateIdManualEntry = allowEmirateIdManualEntry;
+                            $scope.referenceNo = refNo;
+                            if (!$scope.$$phase)
+                                $scope.$apply();
+                            this.RequestInfo = response;
+                            $('#EmiratesBack, #Passport, #Passport2').prop("disabled", false);
+                            $('.dropify-wrapper.actJqStepUpload.disabled').removeClass("disabled");
+                        }
+
+                    }
+                    else {
+                        errorMessage(response.Message, local);
+                    }
+                    NProgress.inc(1);
+                    NProgress.done();
+                },
+                error: function (error) {
+                    NProgress.inc(1);
+                    NProgress.done();
+                    // errorMessage(error, local);
+                }
+            });
+        }
+        else {
+            $scope.AddAttachedToCertificateRequest(file, 1, local);
+        }
+    }
+    $scope.AddAttachedToCertificateRequest = function (file, documentType, local) {
+        NProgress.start();
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var sizeMessage = "";
+        var referenceNo = $scope.referenceNo;
+        var requiredMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+            requiredMessage = "الرجاء ارفاق الواجهة الامامية لصورة الهوية الشخصية"
+
+        }
+        else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+            requiredMessage = "Please attach front emirates id";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default: {
+                errorMessage(docValidAlert, local);
+                file.value = "";
+                return null;
+            }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+        }
+        NProgress.inc(0.40);
+        if (referenceNo != "") {
+            $rootScope.loading = true;
+            if (!$rootScope.$$phase)
+                $rootScope.$apply();
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                url: "/eservices/" + local + "/RequestCertificates/_AttachedDocument?_=" + new Date().getTime() + "&id=" + referenceNo + "&type=" + documentType + "&local=" + local,
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                mimeType: "multipart/form-data",
+                processData: false,
+                success: function (response) {
+                    if (response.Success == true) {
+                        successMessage(response.Message, local);
+                        $(file).attr("documentId", response.Payload.DocumentId);
+                        this.RequestInfo = response;
+                        $scope.GetAllCertificateAttachmentByRequestId(local);
+                    }
+                    else {
+                        errorMessage(response.Message, local);
+                        switch (documentType) {
+                            case 1:
+                                ClearImage($("#EmiratesFront").parent());
+                                break;
+                            case 2:
+                                ClearImage($("#EmiratesBack").parent());
+                                break;
+                            case 3:
+                                ClearImage($("#Passport").parent());
+                                break;
+                            case 4:
+                                ClearImage($("#Passport2").parent());
+                                break;
+                            default:
+                        }
+                    }
+                    NProgress.inc(1);
+                    NProgress.done();
+                },
+                error: function (error) {
+                    // errorMessage(error, local);
+                    NProgress.inc(1);
+                    NProgress.done();
+                }
+            });
+        }
+        else {
+            errorMessage(requiredMessage, local);
+        }
+
+    }
+
+    $scope.UpdateCertificateRequest = function (step, certificateRequest, local) {
+        NProgress.start();
+        certificateRequest.CertificateId = $scope.referenceNo;
+        $http.post("/eservices/" + local + "/RequestCertificates/_UpdateCertificateRequest?_=" + new Date().getTime() + "&step=" + step, { certificateRequest: certificateRequest })
+            .success(function (response) {
+                if (response.Success == true) {
+                    successMessage(response.Message, local);
+                }
+                NProgress.inc(1);
+                NProgress.done();
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+                NProgress.inc(1);
+                NProgress.done();
+            })
+
+    }
+    $scope.InitCertificateRequest = function (id, local) {
+        $scope.referenceNo = id;
+
+        if (id != "") {
+            $http.get("/eservices/" + local + "/RequestCertificates/_GetCertificateRequestById?_=" + new Date().getTime() + "&id=" + id)
+                .success(function (response) {
+                    if (response.Success == true) {
+                        $scope.CertificateRequest = response.Payload;
+                        $scope.Validated = response.Payload.Validated;
+                        $scope.CertificateRequest.CertificateId = id;
+                        $scope.CertificateRequest.MobileNo = response.Payload.Mobile;
+                        $scope.CertificateRequest.Emirate = response.Payload.Emirate.toString();
+                        $scope.CertificateRequest.Email = response.Payload.Email;
+                        $scope.CertificateRequest.TypeOfRequestParty = response.Payload.TypeOfRequestParty.toString();
+                        $scope.CertificateRequest.RequestedBy = response.Payload.RequestedBy;
+                        $scope.CertificateRequest.EmiratesId = response.Payload.EmiratesId;
+                        $scope.CertificateRequest.Name = response.Payload.Name;
+                        $scope.CertificateRequest.Edbarah = response.Payload.Edbarah;
+                        $scope.CertificateRequest.UnifiedNo = response.Payload.UnifiedNo;
+                        $scope.CertificateRequest.PassportNo = response.Payload.PassportNo;
+                        $scope.CertificateRequest.Validated = response.Payload.Validated;
+
+                        if (!$scope.$$phase && !$scope.$root.$$phase)
+                            $scope.$apply();
+                    }
+
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                })
+
+            $scope.GetAllCertificateAttachmentByRequestId(local);
+        }
+    }
+    $scope.GetCertificateRequestById = function (local) {
+        if ($scope.referenceNo != 0) {
+            $http.get("/eservices/" + local + "/RequestCertificates/_GetCertificateRequestById?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                .success(function (response) {
+                    if (response.Success == true) {
+                        $scope.CertificateRequest = response.Payload;
+                        $scope.Validated = response.Payload.Validated;
+
+                        if (!$scope.$$phase)
+                            $scope.$apply();
+                    }
+
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                })
+        }
+    }
+
+    $scope.GenerateOtp = function (local) {
+        if ($scope.referenceNo != 0 && !$scope.Validated) {
+            NProgress.start();
+            $http.get("/eservices/" + local + "/RequestCertificates/_GetCertificateRequestById?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                .success(function (response) {
+                    if (response.Success == true) {
+                        NProgress.inc(.3);
+                        $scope.CertificateRequest = response.Payload;
+                        $scope.Validated = response.Payload.Validated;
+                        if (!$scope.$$phase)
+                            $scope.$apply();
+                    }
+
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                    NProgress.inc(1);
+                    NProgress.done();
+                })
+                .then(function (response) {
+                    if (response.data.Success == true) {
+                        if (!response.data.Payload.Validated) {
+                            $http.post("/eservices/" + local + "/RequestCertificates/_GenerateOtpCertificateRequest?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                                .success(function (response) {
+                                    if (response.Success == true) {
+                                        successMessage(response.Message, local);
+                                    }
+                                    NProgress.inc(1);
+                                    NProgress.done();
+                                })
+                                .error(function (error) {
+                                    NProgress.inc(1);
+                                    NProgress.done();
+                                    // errorMessage(error, local);
+                                })
+                        }
+                    }
+                });
+        }
+    }
+    $scope.ResetOtp = function (local) {
+        if ($scope.referenceNo != 0 && !$scope.Validated) {
+            NProgress.start();
+            $http.get("/eservices/" + local + "/RequestCertificates/_GetCertificateRequestById?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                .success(function (response) {
+                    if (response.Success == true) {
+
+                        $scope.CertificateRequest = response.Payload;
+                        $scope.Validated = response.Payload.Validated;
+                        if (!$scope.$$phase)
+                            $scope.$apply();
+
+                    }
+                    else { errorMessage(response.Message, local); }
+                    NProgress.inc(0.5)
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                    NProgress.inc(1);
+                    NProgress.done();
+                })
+                .then(function (response) {
+                    if (response.data.Success == true) {
+                        if (!response.data.Payload.Validated) {
+                            $http.post("/eservices/" + local + "/RequestCertificates/_ResetOtpCertificateRequest?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                                .success(function (response) {
+                                    if (response.Success == true) {
+                                        successMessage(response.Message, local);
+                                    }
+                                    else {
+                                        errorMessage(response.Message, local);
+                                    }
+                                    NProgress.inc(1);
+                                    NProgress.done();
+                                })
+                                .error(function (error) {
+                                    NProgress.inc(1);
+                                    NProgress.done();
+                                    // errorMessage(error, local);
+                                })
+                        }
+                    }
+                });
+        }
+    }
+    $scope.ValidatOtp = function (otp, local) {
+        if ($scope.referenceNo != 0) {
+            NProgress.start();
+            $http.get("/eservices/" + local + "/RequestCertificates/_GetCertificateRequestById?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                .success(function (response) {
+                    if (response.Success == true) {
+
+                        $scope.CertificateRequest = response.Payload;
+                        $scope.Validated = response.Payload.Validated;
+                    }
+                    NProgress.inc(.4);
+                })
+                .error(function (error) {
+                    // errorMessage(error, local);
+                    NProgress.inc(1);
+                    NProgress.done();
+                })
+                .then(function (response) {
+                    if (response.data.Success == true) {
+                        if (!response.data.Payload.Validated) {
+                            var otp = $('#OtpNo1').val() + $('#OtpNo2').val() + $('#OtpNo3').val() + $('#OtpNo4').val();
+                            $http.post("/eservices/" + local + "/RequestCertificates/_ValidateOtpForReauest?_=" + new Date().getTime() + "&id=" + $scope.referenceNo + "&otp=" + otp)
+                                .success(function (response) {
+                                    if (response.Success == true) {
+                                        successMessage(response.Message, local);
+                                        $scope.GetCertificateRequestById(local);
+                                    }
+                                    else
+                                        errorMessage(response.Message, local);
+                                    NProgress.inc(1);
+                                    NProgress.done();
+                                })
+                                .error(function (error) {
+                                    NProgress.inc(1);
+                                    NProgress.done();
+                                    // errorMessage(error, local);
+                                })
+                        }
+                    }
+                });
+        }
+    }
+    $scope.GetAllCertificateAttachmentByRequestId = function (local) {
+        NProgress.start();
+        $http.get("/eservices/" + local + "/RequestCertificates/_GetAllAttachementByCertificateId?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+            .success(function (response) {
+                NProgress.inc(0.5);
+                response = JSON.parse(response);
+                if (response.Payload.length == 4) {
+                    $scope.Iscompleted = true;
+                }
+                else
+                    $scope.Iscompleted = false;
+                if (response.Success == true) {
+                    for (var it = 0; it < response.Payload.length; it++) {
+                        switch (response.Payload[it].Type) {
+                            case 1:
+                                AddImage($("#EmiratesFront").parent(), response.Payload[it].Url);
+                                $("#EmiratesFront").attr("documentId", response.Payload[it].Id)
+                                break;
+                            case 2:
+                                AddImage($("#EmiratesBack").parent(), response.Payload[it].Url);
+                                $("#EmiratesBack").attr("documentId", response.Payload[it].Id)
+                                break;
+                            case 3:
+                                AddImage($("#Passport").parent(), response.Payload[it].Url);
+                                $("#Passport").attr("documentId", response.Payload[it].Id)
+                                break;
+                            case 4:
+                                AddImage($("#Passport2").parent(), response.Payload[it].Url);
+                                $("#Passport2").attr("documentId", response.Payload[it].Id)
+                                break;
+                            default:
+                        }
+                    }
+
+                }
+                NProgress.inc(1);
+                NProgress.done();
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.ConfirmCertificateRequest = function (local, certificateRequest, step) {
+
+        certificateRequest.CertificateId = $scope.referenceNo;
+
+        $http.post("/eservices/" + local + "/RequestCertificates/_UpdateCertificateRequest?_=" + new Date().getTime() + "&step=" + step, { certificateRequest: certificateRequest })
+            .success(function (response) {
+                if (response.Success == true) {
+                    successMessage(response.Message, local);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            }).then(function (response) {
+                if (response.data.Success) {
+                    $http.post("/eservices/" + local + "/RequestCertificates/_ConfirmCertificateRequest?_=" + new Date().getTime() + "&id=" + $scope.referenceNo)
+                        .success(function (response) {
+                            if (response.Success == true) {
+                                successMessage(response.Message, local);
+                                window.location.href = "/eservices/" + local + "/RequestCertificates/ViewToWhomItMayConcernCertificateRequests";
+                            }
+                        })
+                        .error(function (error) {
+                            // errorMessage(error, local);
+                        })
+                }
+            });
+
+    }
+});
+mrheapp.controller("WidgetsController", function ($scope, $http) {
+    $scope.getContractorPaymentsInfo = function (local) {
+        $http.get("/eservices/" + local + "/Widgets/GetContractorPaymentsDetales")
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.getContractorPaymentsInfo = response;
+                    $(".contractorPaymentEmptyMsg").hide();
+                    $(".contractorPaymentEmptyMsg").empty();
+                }
+                else {
+                    $(".contractorPaymentEmptyMsg").show();
+                    $(".contractorPaymentEmptyMsg").append(response.Message);
+
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+    $scope.GetMaintenanceAwarnessesInfo = function (local) {
+        $http.get("/eservices/" + local + "/Widgets/GetMaintenanceAwarnesses?_=" + new Date().getTime())
+            .success(function (response) {
+
+                if (response.Success == true) {
+
+                    $scope.GetMaintenanceAwarnessesInfo = response;
+                    $(".maintenanceawarenessEmptyMsg").hide();
+                    $(".maintenanceawarenessEmptyMsg").empty();
+                }
+                else {
+                    $(".maintenanceawarenessEmptyMsg").show();
+                    $(".maintenanceawarenessEmptyMsg").append(response.Message);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+
+    $scope.getContractorPaymentApproval = function (local, contractorId, approve) {
+        $http.get("/eservices/" + local + "/Widgets/_ContractorPaymentApproval?_=" + new Date().getTime() + "&contractorId=" + contractorId + "&approve=" + approve)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $("#payment-" + contractorId).hide();
+                    $("#success-" + contractorId).show();
+                    $(".Message-" + contractorId).empty();
+                    $(".Message-" + contractorId).append(response.Message);
+                    successMessage(response.Message, local);
+                }
+                else {
+                    $("#payment-" + contractorId).show();
+                    $("#success-" + contractorId).hide();
+                    $(".Message-" + contractorId).empty();
+                    $(".Message-" + contractorId).append(response.Message);
+                    successMessage(response.Message, local);
+
+                }
+            })
+            .error(function (error) {
+                errorMessage(error, local);
+            })
+    }
+
+    $scope.GetHousingRequests = function (local, page, pageSize) {
+        $http.get("/eservices/" + local + "/Widgets/_GetHousingRequest?_=" + new Date().getTime() + "&page=" + page + "&pageSize=" + pageSize)
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.HousingRequests = response;
+
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.conformDeleteHousingServiceRequest = function (id, title, no, yas, text) {
+        setTimeout(function () { confirmMessage(id) }, 2000);
+    }
+
+});
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+mrhepublicapp.controller("SupplierController", function ($scope, $http) {
+    var isCaptchaValid = false;
+    var referenceNo = 0;
+
+    function hideSteps(step) {
+        switch (step) {
+            case 1:
+                $('#step-2').hide();
+                break;
+            case 2:
+                $('#step-1,#step-3').hide();
+                break;
+            default:
+                {
+                }
+        }
+    }
+
+    $scope.showPopup = function (id) {
+        $(id).addClass("showPopupNewSup");
+    }
+
+    $scope.deleteconfirmForm = function (id) {
+        $("#HfDocId").val(id);
+        $(".deleteConformPopupWrapper").addClass("deleteConformPopupWrapperShow");
+
+        $('.deleteNotBtn').click(function () {
+            $(".deleteConformPopupWrapper").removeClass("deleteConformPopupWrapperShow");
+        });
+        $('.deleteYestBtn').click(function () {
+            $(".deleteConformPopupWrapper").removeClass("deleteConformPopupWrapperShow");
+        });
+    }
+    $scope.hidePopup = function (id) {
+        $(id).removeClass("showPopupNewSup");
+    }
+    $scope.generateOtp = function (local, submitType) {
+        isCaptchaValid == false;
+        if (submitType == 1) {
+            var imageSelect = $("#ImageSelect").val();
+            var quastionID = $("#QuastionID").val();
+            if (imageSelect == "" | isCaptchaValid == false) {
+                errorMessage($('.visualCaptcha-explanation').text(), local);
+                $(".captha_container").addClass("captchaNotSel");
+                return;
+            }
+            else {
+                $(".captha_container").removeClass("captchaNotSel");
+            }
+
+            $http.get("/eservices/" + local + "/RequestCertificates/_TryImageVisualCaptcha?_=" + new Date().getTime() + "&questionId=" + quastionID + "&imageKey=" + imageSelect)
+                .success(function (response) {
+
+                    if (response.Success == true) {
+                        $scope.TryImageVisualCaptchaInfo = response;
+                        $(".ErrCaptcha").empty();
+                        $(".ErrCaptcha").hide();
+                        isCaptchaValid = true;
+                        return;
+                    }
+                    else {
+                        $(".ErrCaptcha").empty();
+                        $(".ErrCaptcha").append(response.Message);
+                        $(".ErrCaptcha").show();
+                        return;
+                    }
+
+                })
+                .error(function (error) {
+                    errorMessage(error, local);
+                    return;
+                }).then(function (response) {
+                    $("#invalidLoginMessage").html("");
+                    $("#OtpSuccessMessage").html("");
+                    referenceNo = $("#ReferenceNo").val();
+                    var mobileNo = $("#MobileNo").val();
+                    $("#invalidLoginMessage").html("");
+
+                    if (local == "ar") {
+                        otpMessage = "تمت معالجةالعملية بنجاح";
+                    } else {
+                        otpMessage = "Operation was done successfully";
+                    }
+                    if (response.data.Success == false) {
+                        errorMessage(response.data.Message, local);
+                        $(".captha_container").addClass("captchaNotSel");
+                        return;
+                    }
+                    else {
+                        $(".captha_container").removeClass("captchaNotSel");
+                        $http.get("/eservices/" + local + "/Supplier/GenerateOtp?_=" + new Date().getTime() + "&reference=" + referenceNo + "&mobileNo=" + mobileNo)
+                            .success(function (response) {
+                                if (response.Success == true) {
+                                    successMessage(response.Message, local);
+                                    $("#OtpSuccessMessage").html(response.Message);
+                                    $(".NewSupOtpWrapper").slideDown("slow");
+                                } else {
+                                    errorMessage(response.Message, local);
+                                    $("#invalidLoginMessage").html(response.Message);
+                                    return;
+                                }
+                            })
+                            .error(function (errordata) {
+                                errorMessage(response.Message, local);
+                                $("#invalidLoginMessage").html(response.Message);
+                            })
+                            .finally(function () {
+                                $(".loding_widgets").css("display", "none");
+
+                            });
+                    }
+                });
+
+
+
+        }
+        else {
+
+            var mobileNo = $("#MobileNo").val();
+            $("#invalidLoginMessage").html("");
+
+            if (local == "ar") {
+                otpMessage = "تمت معالجةالعملية بنجاح";
+            } else {
+                otpMessage = "Operation was done successfully";
+            }
+            $http.get("/eservices/" + local + "/Supplier/GenerateOtp?_=" + new Date().getTime() + "&reference=" + $scope.newVendorRegistration.Id + "&mobileNo=" + mobileNo)
+                .success(function (response) {
+                    if (response.Success == true) {
+                        successMessage(response.Message, local);
+                        $("#OtpSuccessMessage").html(response.Message);
+
+                    } else {
+                        errorMessage(response.Message, local);
+                        $("#invalidLoginMessage").html(response.Message);
+                        return;
+                    }
+                })
+                .error(function (errordata) {
+                    errorMessage(response.Message, local);
+                    $("#invalidLoginMessage").html(response.Message);
+                })
+                .finally(function () {
+                    $(".loding_widgets").css("display", "none");
+
+                });
+        }
+    }
+
+    $scope.verify = function (local) {
+        $("#invalidLoginMessage").html(""); $("#OtpSuccessMessage").html("");
+        var pinMessage = "";
+        //var referenceNo = $("#ReferenceNo").val();
+        var otp = $scope.newVendorRegistration.Otp;
+        var mobileNo = $scope.newVendorRegistration.Mobile;
+        $("#invalidLoginMessage").html("")
+        if (local == "ar") {
+            otpMessage = "تمت معالجةالعملية بنجاح";
+        } else {
+            otpMessage = "Operation was done successfully";
+        }
+        $http.get("/eservices/" + local + "/Supplier/Verify?_=" + new Date().getTime() + "&mobileNo=" + mobileNo + "&otp=" + otp)
+            .success(function (response) {
+                if (response.Success == true) {
+                    //successMessage(otpMessage + " " + response.Message, local);
+                    if (response.Payload.LicenseExpireDate != null)
+                        response.Payload.LicenseExpireDate = response.Payload.LicenseExpireDate.toString().split('T')[0];
+                    $scope.newVendorRegistration = response.Payload;
+                    $(".editConformationWrapper").delay(300).slideUp(500);
+                    if (response.Payload.Status == 20 || response.Payload.Status == 10) {
+                        $("#lblNotAllow").text(response.Message);
+                    }
+                    else {
+
+                        $(".editSteps").delay(1000).slideDown(500);
+                        $scope.getAttachmentsForRequest(local, response.Payload.Id, otp);
+                        //$('#wizard').smartWizard("goToStep", 3);
+                        $('#wizard').smartWizard('setError', { stepnum: 2, iserror: false });
+                        $('#wizard').smartWizard('setError', { stepnum: 1, iserror: false });
+                        $('#msgBox').hide(); $('.msgBox').hide();
+                        $('#submitNewSupplier').show();
+                        if ($('.captha_container').length == 1 && $("#wizard").smartWizard("currentStep") == 1)
+                            $('#wizard').smartWizard("goToStep", 1);
+                    }
+                } else {
+                    errorMessage(response.Message, local);
+                    $('#wizard').smartWizard('showMessage', response.Message);
+                    $('#wizard').smartWizard('setError', { stepnum: 2, iserror: true });
+                    setTimeout(function () { $('#wizard').smartWizard("goToStep", 2); $('#step-1').css("display", "none"); $('#step-3').css("display", "none"); }, 1000);
+
+                }
+            })
+            .error(function (errordata) {
+                $("#invalidLoginMessage").html(errordata.Message);
+            })
+            .finally(function () {
+                $(".loding_widgets").css("display", "none");
+            });
+    }
+
+    $scope.postNewVendorRegistration = function (newVendorRegistration, local) {
+        $http.post("/eservices/" + local + "/Supplier/New/", {
+            model: newVendorRegistration
+        }).success(function (response) {
+            $scope.response = response;
+            if (response.Success == true) {
+                if (response.Payload.LicenseExpireDate != null)
+                    response.Payload.LicenseExpireDate = response.Payload.LicenseExpireDate.toString().split('T')[0];
+                $scope.newVendorRegistration = response.Payload;
+                $('#wizard').smartWizard('setError', { stepnum: 1, iserror: false });
+                $('#msgBox').hide(); $('.msgBox').hide();
+            }
+            else {
+                $scope.response = response;
+                errorMessage(response.Message, local);
+                $('#wizard').smartWizard('showMessage', response.Message);
+                $('#wizard').smartWizard("goBackward");
+                setTimeout(function () { $('#step-2').css("display", "none"); }, 1000);
+            }
+        })
+    }
+
+    $scope.finishVendorRegistration = function (newVendorRegistration, local) {
+        newVendorRegistration.Status = 10;
+        $scope.postEditVendorRegistration(newVendorRegistration, local);
+        $("#wizard").hide();
+        $("#formsubmittedsuccess").show();
+        $("#formApproved").hide();
+    }
+
+    $scope.postEditVendorRegistration = function (newVendorRegistration, local) {
+        $http.post("/eservices/" + local + "/Supplier/Edit/", {
+            model: newVendorRegistration
+        }).success(function (response) {
+            $scope.response = response;
+            if (response.Success == true) {
+                if (response.Payload.LicenseExpireDate != null)
+                    response.Payload.LicenseExpireDate = response.Payload.LicenseExpireDate.toString().split('T')[0];
+                $scope.newVendorRegistration = response.Payload;
+                if (response.Payload.Status == 20 || response.Payload.Status == 10) {
+                    $("#lblNotAllow").text(response.Message);
+                }
+                $('#wizard').smartWizard('setError', { stepnum: 1, iserror: false });
+                $('#msgBox').hide(); $('.msgBox').hide();
+            }
+            else {
+                $scope.response = response;
+                errorMessage(response.Message, local);
+                $('#wizard').smartWizard('showMessage', response.Message);
+
+            }
+        })
+    }
+
+    $scope.getAttachmentsForRequest = function (local, requestNo, otp) {
+        $http.get("/eservices/" + local + "/Supplier/GetAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&otp=" + otp, { headers: { 'Cache-Control': 'no-cache' } })
+            .success(function (response) {
+                if (response.Success == true) {
+                    $scope.getAttachementsForRequestRes = response.Payload;
+                } else {
+                    errorMessage(response.Message, local);
+                    $('#wizard').smartWizard('showMessage', response.Message);
+                    $('#wizard').smartWizard("goBackward");
+                }
+            })
+            .error(function (errordata) {
+                errorMessage(errordata);
+            })
+    }
+
+    $scope.loadFileData = function (file, requestNo, documentTypeId, local) {
+
+        var docValidAlert = "";
+        var docSucessAlert = "";
+        var otp = $scope.newVendorRegistration.Otp;
+        var sizeMessage = "";
+        if (local == "ar") {
+            docValidAlert = "نوع الملف غير مسموح به";
+            docSucessAlert = "لقد تم اكمال العملية بنجاح";
+            sizeMessage = " يجب ان لا يتجاوز حجم الملف/ الملفات المراد ارفاقها (تحميلها) 2 ميغابايت. انواع الملفات المسموح ارفاقها jpg, jpeg, gif, png & pdf";
+
+        } else {
+            docValidAlert = "The attached file type is not allowed";
+            docSucessAlert = "The process has been completed successfully";
+            sizeMessage = "Size limit exceeded (allowed total attachement size 2 MB). File types allowed are jpg, jpeg,gif, png & pdf";
+        }
+        var ext = file.value.match(/\.(.+)$/)[1];
+        var extlower = ext.toLowerCase();
+        switch (extlower) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "pdf":
+                $("#uploadButton").attr("disabled", false);
+                break;
+            default:
+                {
+                    errorMessage(docValidAlert, local);
+                    file.value = "";
+                    return null;
+                }
+        }
+
+        var fileSize = file.files[0].size;
+        if ((1024 * 1024 * 2) <= fileSize) {
+            errorMessage(sizeMessage, local);
+            file.value = "";
+            return null;
+        }
+
+        var formData = new FormData();
+
+        for (var i = 0; i < file.files.length; i++) {
+            formData.append('file', file.files[i], file.files[i].name);
+            formData.append("type", documentTypeId);
+        }
+
+        NProgress.start();
+        $.ajax({
+            type: "POST",
+            crossDomain: true,
+            url: "/eservices/" + local + "/Supplier/AttachDocumentRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&otp=" + otp + "&type=" + documentTypeId + "&local=" + local,
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            async: false,
+            mimeType: "multipart/form-data",
+            processData: false,
+            success: function (response) {
+                if (response.Success == true) {
+                    document.getElementsByClassName("close")[0].click();
+                    successMessage(response.Message, local);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+                NProgress.inc(1);
+                NProgress.done();
+            },
+            error: function (error) {
+                NProgress.inc(1);
+                NProgress.done();
+                // errorMessage(error, local);
+            }
+        }).then(function (response) {
+            $http.get("/eservices/" + local + "/Supplier/GetAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + $scope.newVendorRegistration.Id + "&otp=" + otp)
+                .success(function (response) {
+                    if (response.Success == true) {
+                        $scope.getAttachementsForRequestRes = response.Payload;
+                        $scope.hidePopup()
+
+                    } else {
+                        errorMessage(response.Message, local);
+                        $('#wizard').smartWizard('showMessage', response.Message);
+                        $('#wizard').smartWizard("goBackward");
+                    }
+                })
+                .error(function (errordata) {
+                    errorMessage(errordata);
+                })
+        });
+
+    }
+
+    $scope.viewSupplierAttachmentByIdForRequest = function (requestNo, attachmentId, local) {
+        var otp = $("#Otp").val();
+        $http.get("/eservices/" + local + "/Supplier/ViewAttachementByIdForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId + "&otp=" + otp)
+            .success(function (response) {
+                if (response.Success != true) {
+                    errorMessage(response.Message, local);
+                } else {
+                    $scope.ViewAttachementUrl = response.Payload;
+                    if (response.Payload.indexOf(".pdf") !== -1)
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button> <iframe frameborder='0' src='" + response.Payload + "' /></iframe></div></div>");
+                    else
+                        $("#viewAttachement").html("<div class='viewPopupOverlay'><div class='viewPopup bounceInDown animated'><button class='ViewAttachClose' onclick='closeviewattachement()'>X</button><img  src='" + response.Payload + "' alt='img' /> </div></div>");
+
+                }
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+
+    }
+
+    $scope.deleteAttachmentsForRequest = function (requestNo, local) {
+        var attachmentId = $('#HfDocId').val();
+        var otp = $("#Otp").val();
+        $http.get("/eservices/" + local + "/Supplier/DeleteAttachmentsForRequest?_=" + new Date().getTime() + "&requestNo=" + requestNo + "&attachmentId=" + attachmentId + "&otp=" + otp)
+            .success(function (response) {
+                local == "ar" ? docSucessAlert = "لقد تم اكمال العملية بنجاح" : docSucessAlert = "The process has been completed successfully";
+                if (response.Success) {
+                    $scope.getAttachementsForRequestRes = response.Payload;
+                    successMessage(docSucessAlert, local);
+                }
+                else {
+                    errorMessage(response.Message, local);
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.GetVisualCaptcha = function (local, size) {
+        $http.get("/eservices/" + local + "/RequestCertificates/GetVisualCaptcha?_=" + new Date().getTime() + "&size=" + size)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.GetVisualCaptchaInfo = response;
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").hide();
+                }
+                else {
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").show();
+                    $('.ErrCaptcha').append(response.Message);
+
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.TryImageVisualCaptcha = function (local, questionId, imageKey) {
+        $("#ImageSelect").val(imageKey);
+        $http.get("/eservices/" + local + "/RequestCertificates/_TryImageVisualCaptcha?_=" + new Date().getTime() + "&questionId=" + questionId + "&imageKey=" + imageKey)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.TryImageVisualCaptchaInfo = response;
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").hide();
+                    isCaptchaValid = true;
+                    return;
+                }
+                else {
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").append(response.Message);
+                    $(".ErrCaptcha").show();
+                    return;
+                }
+
+            })
+            .error(function (error) {
+                errorMessage(error, local);
+                return;
+            })
+    }
+
+    $scope.TryAudioVisualCaptchaInfo = function (local, audioId, answer) {
+        $http.get("/eservices/" + local + "/RequestCertificates/_TryAudioVisualCaptcha?_=" + new Date().getTime() + "&audioId=" + audioId + "&answer=" + answer)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.TryAudioVisualCaptchaInfo = response;
+                    $(".ErrCaptcha").hide();
+                    $(".ErrCaptcha").empty();
+                }
+                else {
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").append(response.Message);
+                    $(".ErrCaptcha").show();
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.ListenAudio = function (local, audioId, el) {
+        $http.get("/eservices/" + local + "/RequestCertificates/_ListenAudio?_=" + new Date().getTime() + "&audioId=" + audioId)
+            .success(function (response) {
+
+                if (response.Success == true) {
+                    $scope.ListenAudioInfo = response;
+                    $scope.PlaySounds(el, response.Payload.AudioUrl);
+                    $(".ErrCaptcha").empty();
+                    $(".ErrCaptcha").hide();
+                }
+                else {
+                    $(".ErrCaptcha").append(response.Message);
+                    $(".ErrCaptcha").show();
+                }
+
+            })
+            .error(function (error) {
+                // errorMessage(error, local);
+            })
+    }
+
+    $scope.PlaySounds = function (el, soundUrl) {
+        if (el.mp3) {
+            if (el.mp3.paused) el.mp3.play();
+            else el.mp3.pause();
+        } else {
+            el.mp3 = new Audio(soundUrl);
+            el.mp3.play();
+        }
+    }
+});
+
+mrhepublicapp.controller("ContractorReviewController", function ($scope, $http) {
+
+    $scope.getContractorReviewData = function (contractorReview, local) {
+        $http.get("/eservices/" + local + "/ContractorReview/ReviewData/", {
+            model: contractorReview
+        }).success(function (response) {
+            $scope.response = response;
+            if (response.Success == true) {
+                $scope.contractorReview = response.Payload;
+                $('#myTable').DataTable();
+            }
+            else {
+                $scope.response = response;
+                errorMessage(response.Message, local);
+            }
+        })
+    }
+
+    $scope.getContractorReviewFilters = function (local) {
+        $http.get("/eservices/" + local + "/ContractorReview/ReviewFilters/")
+            .success(function (response) {
+                $scope.response = response;
+                if (response.Success == true) {
+                    $scope.contractorReviewFilters = response.Payload;
+                }
+                else {
+                    $scope.response = response;
+                    errorMessage(response.Message, local);
+                }
+            })
+    }
+});
+mrheapp.controller("HouseBookingController", function ($scope, $http) {
+    function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+        try {
+            decimalCount = Math.abs(decimalCount);
+            decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+            const negativeSign = amount < 0 ? "-" : "";
+
+            let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+            let j = (i.length > 3) ? i.length % 3 : 0;
+
+            return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+        } catch (e) {
+            console.log(e)
+        }
+    }
+    $scope.HouseBookingModel = {
+        Id: 0,
+        ProjectId: 0,
+        VillaStyle: 0,
+        Floor: 0,
+        Bedroom: 0,
+        VillaType: -1,
+        MinPric: null,
+        MaxPrice: null,
+        MinArea: null,
+        MaxArea: null
+    };
+
+    var getHouseBooking = function (local, page, pageSize, Model) {
+
+        $http.post("/eservices/" + local + "/HouseBooking/GetHouseBooking?_=" + new Date().getTime() + "&Page=" + page + "&pageSize=" + pageSize + "&orderby=" + $("#rating").val(), { houseBookingModel: Model }).success(function (response) {
+            $scope.HouseList = response;
+            if (response.Success == true) {
+
+                if (response.Payload.length > 0) {
+                    $(".bookHousePagination").show();
+
+                    var pages = response.Total % pageSize != 0 ? response.Total / pageSize + 1 : response.Total / pageSize;
+                    $('#page-selection').bootpag({
+                        total: response.Total,
+                        page: 1,
+                        maxVisible: pages,
+                        leaps: true,
+                        firstLastUse: true,
+                        first: '←',
+                        last: '→',
+                        wrapClass: 'pagination',
+                        activeClass: 'active',
+                        disabledClass: 'disabled',
+                        nextClass: 'next',
+                        prevClass: 'prev',
+                        lastClass: 'last',
+                        firstClass: 'first'
+                    }).on("page", function (event, /* page number here */ num) {
+                        $scope.getHousePagination(local, num - 1, pageSize);
+                    });
+                }
+                else
+                    $(".bookHousePagination").hide();
+            }
+            else {
+                errorMessage(response.Message, local);
+            }
+        });
+    }
+    var getRelatedPropertiesDetails = function (local, pageSize = 10, page = 0) {
+        $scope.HouseBookingModel.PropertyId = getParameterByName('id');
+        $scope.HouseBookingModel.MinPrice = $("#slider_range_price").slider("values")[0];
+        $scope.HouseBookingModel.MaxPrice = $("#slider_range_price").slider("values")[1];
+        $scope.HouseBookingModel.MinArea = $("#slider_range_space").slider("values")[0];
+        $scope.HouseBookingModel.MaxArea = $("#slider_range_space").slider("values")[1];
+
+        $http.post("/eservices/" + local + "/HouseBooking/GetRelatedPropertiesDetails?_=" + new Date().getTime() + "&Page=" + page + "&pageSize=" + pageSize + "&orderby=" + $("#rating").val(), { houseBookingModel: $scope.HouseBookingModel }).success(function (response) {
+            if (response.Success == true) {
+                $scope.HouseList = response;
+                document.getElementById("HouseView").src = $scope.HouseList.Payload.ThreeDimensionalHouseURL;
+                //$(function () {
+                //    $("#slider_range").flatslider({
+                //        min: response.Payload == null ? 0 : response.Payload.PriceRange.Min,
+                //        max: response.Payload == null ? 300000 : response.Payload.PriceRange.Max,
+                //        step: 1000,
+                //        values: [0, response.Payload == null ? 300000 : response.Payload.PriceRange.Max],
+                //        range: true,
+                //        einheit: 'AED'
+                //    });
+                //});
+            }
+        })
+    };
+
+    $scope.getHouseList = function (local, pageSize) {
+        getHouseBooking(local, 0, pageSize, $scope.HouseBookingModel);
+    }
+    $scope.getHousePagination = function (local, page, pageSize) {
+        getHouseBooking(local, page, pageSize, null);
+    }
+    $scope.getHouseFilter = function (local, pageSize) {
+        //$scope.HouseBookingModel.MinPrice = $("#slider_range").val().split(';')[0];
+        //$scope.HouseBookingModel.MaxPrice = $("#slider_range").val().split(';')[1];
+        $scope.HouseBookingModel.Bedroom = isNaN($("#Bedroom").val()) ? null : $("#Bedroom").val();
+        $scope.HouseBookingModel.Floor = isNaN($("#Floor").val()) ? null : $("#Floor").val();
+        $scope.HouseBookingModel.VillaType = $("#HouseType").val() == "-1" ? "-1" : $("#HouseType").val();
+        $scope.HouseBookingModel.VillaStyle = $("#VillaStyle").val() == "0" ? "0" : $("#VillaStyle").val();
+        getHouseBooking(local, 0, pageSize, $scope.HouseBookingModel);
+
+    }
+    $scope.selectedHouseId;
+    $scope.Location;
+    var addMarkerWithTimeout = $scope.addMarkerWithTimeout = function (position, contentString, timeout) {
+
+        var marker = new google.maps.Marker({
+            position: position,
+            map: map,
+            animation: google.maps.Animation.DROP,
+            icon: "../../images/location3.png"
+        });
+
+        var infowindow = new google.maps.InfoWindow({
+            content: contentString
+        });
+
+        marker.addListener('click', function () {
+            $(".gm-style-iw").parent().remove();
+            infowindow.open(marker.get('map'), this);
+            $("#PayableAmount").html($("#PayableAmountInfoWindow").attr("PayableAmount"));
+            $("#sellingPrice").html($("#infoSellingPrice").attr("SellingPrice"));
+            $scope.selectedHouseId = $("#houseInfoWindow").attr("houseId");
+            $scope.Location = 'https://maps.google.com?q=' + $("#houseInfoWindow").attr("Latitude") + ',' + $("#houseInfoWindow").attr("Longitude");
+            $scope.$apply();
+        });
+        marker.setMap(map);
+    }
+    var initProjectsMap = $scope.initProjectsMap = function (local, properties) {
+        let _yourhomeloan = local.toLowerCase() == 'ar' ? 'قرض منزلك' : 'Your home loan';
+        let _payableAmount = local.toLowerCase() == 'ar' ? 'المبلغ المستحق' : 'Payable Amount';
+        let _loanAmount = local.toLowerCase() == 'ar' ? 'قيمة القرض' : 'Loan amount';
+        let _totallAmount = local.toLowerCase() == 'ar' ? 'إجمالي المدفوعات' : 'Paid Amount';
+        let _select = local.toLowerCase() == 'ar' ? 'اختيار' : 'Select';
+        let _AED = local.toLowerCase() == 'ar' ? 'درهم' : 'AED';
+        if (properties.RelatedProperties.length > 0 && properties.RelatedProperties[0].SellingPrice != null) {
+            $scope.PayableAmount = parseFloat(properties.RelatedProperties[0].SellingPrice.replace(".00", "").replace(/\D/g, '')) - 750000;
+            $scope.HouseList.SellingPrice = parseFloat(properties.RelatedProperties[0].SellingPrice.replace(".00", "").replace(/\D/g, ''));
+            $scope.selectedHouseId = properties.Id;
+            $scope.Location = "https://maps.google.com?q=" + properties.RelatedProperties[0].Latitude + "," + properties.RelatedProperties[0].Longitude;
+            $scope.Longitude = properties.RelatedProperties[0].Longitude;
+            $scope.Latitude = properties.RelatedProperties[0].Latitude;
+        }
+        clearMarkers();
+        properties.RelatedProperties.forEach(function (item) {
+            var sellingPrice = parseFloat(item.SellingPrice.replace(".00", "").replace(/\D/g, ''));
+            var latitude = item.Latitude == null ? "" : item.Latitude;
+            var longitude = item.Longitude == null ? "" : item.Longitude;
+            var html = '<div id="houseInfoWindow"  Longitude=' + longitude + ' Latitude=' + latitude + '  houseId=' + item.Id + ' class="col-md-12 yourHomeloanCalc mapHomeloanCalcBox">';
+            html += '<div class="detaildCalcBoxRow"><div class="row"><div class="col-md-12"><h2><i><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30px" height="34px">';
+            html += '<path fill-rule="evenodd" fill="rgb(51, 109, 155)" d="M30.000,25.402 C30.000,26.232 29.460,26.934 28.711,27.202 C29.318,27.455 29.745,28.048 29.745,28.739 C29.745,29.431 29.318,30.024 28.710,30.277 C29.460,30.544 30.000,31.247 30.000,32.077 C30.000,33.136 29.126,33.997 28.052,33.997 L17.512,33.997 C17.224,33.997 16.945,33.935 16.681,33.812 L16.291,33.630 C16.029,33.660 15.770,33.703 15.500,33.703 C15.074,33.703 14.661,33.652 14.256,33.580 C14.136,33.558 14.019,33.532 13.901,33.505 C13.793,33.480 13.680,33.466 13.573,33.436 C13.297,33.630 12.959,33.745 12.594,33.745 L2.054,33.745 C1.119,33.745 0.361,32.998 0.361,32.077 C0.361,31.385 0.788,30.792 1.395,30.539 C0.646,30.271 0.106,29.569 0.106,28.739 C0.106,27.909 0.646,27.207 1.395,26.940 C0.788,26.686 0.361,26.093 0.361,25.402 C0.361,24.711 0.788,24.118 1.395,23.864 C0.646,23.597 0.106,22.895 0.106,22.065 C0.106,21.006 0.980,20.144 2.054,20.144 L12.594,20.144 C12.711,20.144 12.833,20.156 12.956,20.178 L13.447,20.269 C13.459,20.266 13.471,20.264 13.483,20.261 C13.772,20.174 14.062,20.096 14.366,20.047 C14.735,19.979 15.111,19.934 15.500,19.934 C15.689,19.934 15.867,19.970 16.052,19.985 C15.752,19.647 15.564,19.210 15.564,18.727 C15.564,17.897 16.104,17.195 16.853,16.928 C16.246,16.674 15.819,16.081 15.819,15.390 C15.819,14.699 16.246,14.106 16.854,13.852 C16.104,13.585 15.564,12.883 15.564,12.053 C15.564,11.223 16.104,10.521 16.854,10.253 C16.246,10.000 15.819,9.407 15.819,8.715 C15.819,7.794 16.577,7.047 17.512,7.047 L28.052,7.047 C28.987,7.047 29.745,7.794 29.745,8.715 C29.745,9.407 29.318,10.000 28.710,10.253 C29.460,10.521 30.000,11.223 30.000,12.053 C30.000,12.883 29.460,13.585 28.710,13.852 C29.318,14.106 29.745,14.699 29.745,15.390 C29.745,16.081 29.318,16.674 28.711,16.928 C29.460,17.195 30.000,17.897 30.000,18.727 C30.000,19.557 29.460,20.259 28.711,20.527 C29.318,20.780 29.745,21.373 29.745,22.065 C29.745,22.756 29.318,23.349 28.710,23.602 C29.460,23.870 30.000,24.572 30.000,25.402 ZM28.052,33.493 C28.844,33.493 29.489,32.858 29.489,32.077 C29.489,31.295 28.844,30.660 28.052,30.660 L21.602,30.660 C20.756,31.963 19.508,32.953 18.061,33.493 L28.052,33.493 ZM21.604,30.140 C21.601,30.145 21.598,30.151 21.595,30.156 L21.596,30.156 C21.599,30.151 21.601,30.145 21.604,30.140 ZM0.617,28.739 C0.617,29.521 1.261,30.156 2.054,30.156 L9.100,30.156 C8.631,29.282 8.351,28.314 8.280,27.323 L2.054,27.323 C1.261,27.323 0.617,27.958 0.617,28.739 ZM2.054,20.648 C1.261,20.648 0.617,21.283 0.617,22.065 C0.617,22.846 1.261,23.481 2.054,23.481 L9.101,23.481 C9.740,22.294 10.698,21.316 11.865,20.648 L2.054,20.648 ZM15.479,20.375 C15.073,20.375 14.679,20.423 14.293,20.493 C14.176,20.514 14.062,20.545 13.946,20.573 C13.704,20.631 13.469,20.706 13.238,20.789 C13.038,20.862 12.843,20.944 12.653,21.035 C12.466,21.124 12.283,21.221 12.107,21.327 C11.928,21.434 11.755,21.550 11.588,21.673 C11.423,21.796 11.263,21.925 11.111,22.062 C10.957,22.199 10.811,22.344 10.672,22.495 C10.532,22.647 10.400,22.804 10.276,22.968 C10.152,23.132 10.036,23.301 9.928,23.476 C9.786,23.706 9.649,23.939 9.537,24.186 C9.511,24.242 9.482,24.295 9.458,24.351 C9.318,24.687 9.210,25.038 9.128,25.400 C9.110,25.479 9.097,25.559 9.082,25.639 C9.012,26.016 8.963,26.401 8.963,26.798 C8.963,27.223 9.010,27.637 9.090,28.039 C9.105,28.113 9.130,28.182 9.147,28.255 C9.218,28.557 9.311,28.850 9.424,29.134 C9.463,29.234 9.504,29.333 9.548,29.430 C9.692,29.744 9.854,30.049 10.046,30.334 C10.060,30.355 10.070,30.378 10.084,30.399 C10.313,30.731 10.573,31.041 10.860,31.325 C10.959,31.423 11.077,31.501 11.183,31.592 C11.382,31.766 11.578,31.944 11.798,32.093 C11.948,32.195 12.116,32.270 12.275,32.359 C12.472,32.469 12.663,32.588 12.873,32.678 C13.052,32.756 13.245,32.804 13.432,32.866 C13.649,32.937 13.862,33.018 14.088,33.066 C14.157,33.081 14.229,33.091 14.299,33.103 C14.683,33.173 15.075,33.221 15.479,33.221 C15.822,33.221 16.152,33.171 16.482,33.121 C16.757,33.079 17.024,33.014 17.288,32.938 C17.458,32.889 17.631,32.845 17.795,32.783 C18.057,32.684 18.305,32.560 18.549,32.430 C18.695,32.352 18.847,32.284 18.986,32.196 C19.237,32.038 19.465,31.851 19.691,31.660 C19.800,31.569 19.919,31.490 20.021,31.392 C20.304,31.120 20.558,30.820 20.787,30.502 C20.813,30.466 20.848,30.436 20.873,30.399 C20.888,30.378 20.898,30.354 20.913,30.332 C21.103,30.048 21.266,29.744 21.409,29.430 C21.454,29.333 21.494,29.233 21.534,29.134 C21.647,28.850 21.739,28.557 21.810,28.256 C21.828,28.183 21.853,28.113 21.867,28.039 C21.947,27.637 21.994,27.223 21.994,26.798 C21.994,26.401 21.946,26.016 21.876,25.639 C21.861,25.559 21.847,25.479 21.829,25.400 C21.748,25.038 21.640,24.687 21.499,24.351 C21.475,24.295 21.446,24.242 21.421,24.187 C21.313,23.948 21.180,23.725 21.044,23.503 C20.911,23.285 20.764,23.078 20.606,22.878 C20.495,22.736 20.382,22.595 20.259,22.463 C20.076,22.268 19.876,22.090 19.670,21.918 C19.543,21.812 19.420,21.701 19.284,21.604 C19.041,21.431 18.778,21.284 18.511,21.145 C18.388,21.081 18.272,21.006 18.144,20.949 C17.806,20.799 17.448,20.686 17.082,20.594 C17.002,20.574 16.928,20.539 16.846,20.522 C16.838,20.521 16.830,20.520 16.823,20.518 C16.389,20.428 15.940,20.375 15.479,20.375 ZM21.586,23.481 C21.575,23.462 21.560,23.446 21.549,23.427 C21.560,23.446 21.573,23.463 21.583,23.481 L21.586,23.481 ZM29.489,12.053 C29.489,11.271 28.844,10.636 28.052,10.636 L17.512,10.636 C16.720,10.636 16.075,11.271 16.075,12.053 C16.075,12.834 16.720,13.469 17.512,13.469 L28.052,13.469 C28.844,13.469 29.489,12.834 29.489,12.053 ZM29.489,18.727 C29.489,17.946 28.844,17.310 28.052,17.310 L17.512,17.310 C16.720,17.310 16.075,17.946 16.075,18.727 C16.075,19.509 16.720,20.144 17.512,20.144 L28.052,20.144 C28.844,20.144 29.489,19.509 29.489,18.727 ZM28.052,23.985 L22.145,23.985 C22.540,24.880 22.739,25.832 22.739,26.819 L28.052,26.819 C28.844,26.819 29.489,26.183 29.489,25.402 C29.489,24.621 28.844,23.985 28.052,23.985 ZM15.754,28.031 L16.382,28.031 L16.382,28.739 L15.754,28.739 L15.754,28.031 ZM12.218,28.262 L14.773,28.262 C14.773,27.657 14.662,27.166 14.434,26.799 C14.159,26.356 13.730,26.125 13.157,26.091 L12.971,26.091 L12.971,25.642 C13.944,25.642 14.614,26.023 14.966,26.785 C15.181,27.241 15.284,27.888 15.284,28.739 L12.218,28.739 L12.218,28.262 ZM17.239,23.518 C17.239,23.171 17.419,22.919 17.805,22.919 C18.102,22.919 18.282,23.062 18.344,23.354 L18.061,23.382 C18.033,23.225 17.951,23.143 17.805,23.143 C17.619,23.143 17.522,23.266 17.522,23.511 C17.522,23.606 17.543,23.688 17.591,23.756 L18.330,23.756 L18.330,24.028 L17.011,24.028 L17.011,23.756 L17.287,23.756 C17.253,23.681 17.239,23.599 17.239,23.518 ZM17.909,28.739 L17.426,28.739 L17.426,24.335 L17.909,24.335 L17.909,28.739 ZM13.605,18.811 L0.829,18.811 C0.372,18.811 -0.001,18.444 -0.001,17.993 L-0.001,0.813 C-0.001,0.361 0.372,-0.006 0.829,-0.006 L13.605,-0.006 C14.063,-0.006 14.435,0.361 14.435,0.813 L14.435,17.993 C14.435,18.444 14.063,18.811 13.605,18.811 ZM13.797,0.813 C13.797,0.709 13.710,0.624 13.605,0.624 L0.829,0.624 C0.724,0.624 0.638,0.709 0.638,0.813 L0.638,17.993 C0.638,18.097 0.724,18.182 0.829,18.182 L13.605,18.182 C13.710,18.182 13.797,18.097 13.797,17.993 L13.797,0.813 ZM12.083,6.228 L2.182,6.228 C2.041,6.228 1.926,6.115 1.926,5.976 L1.926,1.978 C1.926,1.839 2.041,1.726 2.182,1.726 L12.083,1.726 C12.224,1.726 12.338,1.839 12.338,1.978 L12.338,5.976 C12.338,6.115 12.224,6.228 12.083,6.228 ZM3.235,7.576 C3.909,7.576 4.456,8.115 4.456,8.780 C4.456,9.445 3.909,9.984 3.235,9.984 C2.561,9.984 2.014,9.445 2.014,8.780 C2.014,8.115 2.561,7.576 3.235,7.576 ZM3.235,11.013 C3.909,11.013 4.456,11.552 4.456,12.217 C4.456,12.882 3.909,13.420 3.235,13.420 C2.561,13.420 2.014,12.882 2.014,12.217 C2.014,11.552 2.561,11.013 3.235,11.013 ZM3.235,14.637 C3.909,14.637 4.456,15.176 4.456,15.841 C4.456,16.505 3.909,17.044 3.235,17.044 C2.561,17.044 2.014,16.505 2.014,15.841 C2.014,15.176 2.561,14.637 3.235,14.637 ZM7.119,7.576 C7.794,7.576 8.340,8.115 8.340,8.780 C8.340,9.445 7.794,9.984 7.119,9.984 C6.445,9.984 5.899,9.445 5.899,8.780 C5.899,8.115 6.445,7.576 7.119,7.576 ZM7.119,11.013 C7.794,11.013 8.340,11.552 8.340,12.217 C8.340,12.882 7.794,13.420 7.119,13.420 C6.445,13.420 5.899,12.882 5.899,12.217 C5.899,11.552 6.445,11.013 7.119,11.013 ZM7.119,14.637 C7.794,14.637 8.340,15.176 8.340,15.841 C8.340,16.505 7.794,17.044 7.119,17.044 C6.445,17.044 5.899,16.505 5.899,15.841 C5.899,15.176 6.445,14.637 7.119,14.637 ZM11.004,7.576 C11.678,7.576 12.225,8.115 12.225,8.780 C12.225,9.445 11.678,9.984 11.004,9.984 C10.330,9.984 9.783,9.445 9.783,8.780 C9.783,8.115 10.330,7.576 11.004,7.576 ZM11.004,11.013 C11.678,11.013 12.225,11.552 12.225,12.217 C12.225,12.882 11.678,13.420 11.004,13.420 C10.330,13.420 9.783,12.882 9.783,12.217 C9.783,11.552 10.330,11.013 11.004,11.013 ZM11.004,14.637 C11.678,14.637 12.225,15.176 12.225,15.841 C12.225,16.505 11.678,17.044 11.004,17.044 C10.330,17.044 9.783,16.505 9.783,15.841 C9.783,15.176 10.330,14.637 11.004,14.637 Z" />';
+            html += '</svg></i>' + _yourhomeloan.toString() + '<div class="googleMapPopupDirectionBtn"><a href="https://maps.google.com?q=' + latitude + ',' + longitude + '" target="_blank">  Direction </a></div>';
+            html += '</h2> </div> </div><div class="col-md-4 googlepopupHousingamount"><div class="detaildCalcBox"><span>' + _totallAmount + '</span>';
+            html += '<span id="infoSellingPrice" SellingPrice="' + item.SellingPrice + '">   ' + item.SellingPrice + '</span></div></div><div class="col-md-1 detaildCalcIco">';
+            html += '<span>-</span> </div><div class="col-md-3 googlepopupHousingamount"><div class="detaildCalcBox"><span>' + _loanAmount + ' </span>750,000 ' + _AED;
+            html += '</div></div><div class="col-md-1 detaildCalcIco"><span>=</span></div><div class="col-md-3 googlepopupHousingamount"><div class="detaildCalcBox housePayableAmount">';
+            html += '<span>' + _payableAmount.toString() + '</span><span id="PayableAmountInfoWindow" PayableAmount="';
+            html += sellingPrice - 750000 + _AED + '">' + (sellingPrice - 750000) + _AED + ' </span>';
+            html += ' </div></div></div></div>';
+            var location = [];
+            location.push({
+                "lat": parseFloat(latitude),
+                "lng": parseFloat(longitude)
+            })
+            var myLatlng = new google.maps.LatLng(latitude, longitude);
+            addMarkerWithTimeout(myLatlng, html, 1000);
+
+        });
+    }
+    var initProjectMap = $scope.initProjectsMap = function (local, property) {
+        let _yourhomeloan = local.toLowerCase() == 'ar' ? 'قرض منزلك' : 'Your home loan';
+        let _payableAmount = local.toLowerCase() == 'ar' ? 'المبلغ المستحق' : 'Payable Amount';
+        let _loanAmount = local.toLowerCase() == 'ar' ? 'قيمة القرض' : 'Loan amount';
+        let _totallAmount = local.toLowerCase() == 'ar' ? 'إجمالي المدفوعات' : 'Paid Amount';
+        let _select = local.toLowerCase() == 'ar' ? 'اختيار' : 'Select';
+        let _AED = local.toLowerCase() == 'ar' ? 'درهم' : 'AED';
+        if (property.SellingPrice != null) {
+            $scope.PayableAmount = parseFloat(property.SellingPrice.replace(".00", "").replace(/\D/g, '')) - 750000;
+            $scope.HouseList.SellingPrice = parseFloat(property.SellingPrice.replace(".00", "").replace(/\D/g, ''));
+            $scope.selectedHouseId = property.Id;
+            $scope.Location = "https://maps.google.com?q=" + property.Latitude + "," + property.Longitude;
+            $scope.Longitude = property.Longitude;
+            $scope.Latitude = property.Latitude;
+        }
+        clearMarkers();
+        var sellingPrice = parseFloat(property.SellingPrice.replace(".00", "").replace(/\D/g, ''));
+        var latitude = property.Latitude == null ? "" : property.Latitude;
+        var longitude = property.Longitude == null ? "" : property.Longitude;
+        var html = '<div id="houseInfoWindow"  Longitude=' + longitude + ' Latitude=' + latitude + '  houseId=' + property.Id + ' class="col-md-12 yourHomeloanCalc mapHomeloanCalcBox">';
+        html += '<div class="detaildCalcBoxRow"><div class="row"><div class="col-md-12"><h2><i><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30px" height="34px">';
+        html += '<path fill-rule="evenodd" fill="rgb(51, 109, 155)" d="M30.000,25.402 C30.000,26.232 29.460,26.934 28.711,27.202 C29.318,27.455 29.745,28.048 29.745,28.739 C29.745,29.431 29.318,30.024 28.710,30.277 C29.460,30.544 30.000,31.247 30.000,32.077 C30.000,33.136 29.126,33.997 28.052,33.997 L17.512,33.997 C17.224,33.997 16.945,33.935 16.681,33.812 L16.291,33.630 C16.029,33.660 15.770,33.703 15.500,33.703 C15.074,33.703 14.661,33.652 14.256,33.580 C14.136,33.558 14.019,33.532 13.901,33.505 C13.793,33.480 13.680,33.466 13.573,33.436 C13.297,33.630 12.959,33.745 12.594,33.745 L2.054,33.745 C1.119,33.745 0.361,32.998 0.361,32.077 C0.361,31.385 0.788,30.792 1.395,30.539 C0.646,30.271 0.106,29.569 0.106,28.739 C0.106,27.909 0.646,27.207 1.395,26.940 C0.788,26.686 0.361,26.093 0.361,25.402 C0.361,24.711 0.788,24.118 1.395,23.864 C0.646,23.597 0.106,22.895 0.106,22.065 C0.106,21.006 0.980,20.144 2.054,20.144 L12.594,20.144 C12.711,20.144 12.833,20.156 12.956,20.178 L13.447,20.269 C13.459,20.266 13.471,20.264 13.483,20.261 C13.772,20.174 14.062,20.096 14.366,20.047 C14.735,19.979 15.111,19.934 15.500,19.934 C15.689,19.934 15.867,19.970 16.052,19.985 C15.752,19.647 15.564,19.210 15.564,18.727 C15.564,17.897 16.104,17.195 16.853,16.928 C16.246,16.674 15.819,16.081 15.819,15.390 C15.819,14.699 16.246,14.106 16.854,13.852 C16.104,13.585 15.564,12.883 15.564,12.053 C15.564,11.223 16.104,10.521 16.854,10.253 C16.246,10.000 15.819,9.407 15.819,8.715 C15.819,7.794 16.577,7.047 17.512,7.047 L28.052,7.047 C28.987,7.047 29.745,7.794 29.745,8.715 C29.745,9.407 29.318,10.000 28.710,10.253 C29.460,10.521 30.000,11.223 30.000,12.053 C30.000,12.883 29.460,13.585 28.710,13.852 C29.318,14.106 29.745,14.699 29.745,15.390 C29.745,16.081 29.318,16.674 28.711,16.928 C29.460,17.195 30.000,17.897 30.000,18.727 C30.000,19.557 29.460,20.259 28.711,20.527 C29.318,20.780 29.745,21.373 29.745,22.065 C29.745,22.756 29.318,23.349 28.710,23.602 C29.460,23.870 30.000,24.572 30.000,25.402 ZM28.052,33.493 C28.844,33.493 29.489,32.858 29.489,32.077 C29.489,31.295 28.844,30.660 28.052,30.660 L21.602,30.660 C20.756,31.963 19.508,32.953 18.061,33.493 L28.052,33.493 ZM21.604,30.140 C21.601,30.145 21.598,30.151 21.595,30.156 L21.596,30.156 C21.599,30.151 21.601,30.145 21.604,30.140 ZM0.617,28.739 C0.617,29.521 1.261,30.156 2.054,30.156 L9.100,30.156 C8.631,29.282 8.351,28.314 8.280,27.323 L2.054,27.323 C1.261,27.323 0.617,27.958 0.617,28.739 ZM2.054,20.648 C1.261,20.648 0.617,21.283 0.617,22.065 C0.617,22.846 1.261,23.481 2.054,23.481 L9.101,23.481 C9.740,22.294 10.698,21.316 11.865,20.648 L2.054,20.648 ZM15.479,20.375 C15.073,20.375 14.679,20.423 14.293,20.493 C14.176,20.514 14.062,20.545 13.946,20.573 C13.704,20.631 13.469,20.706 13.238,20.789 C13.038,20.862 12.843,20.944 12.653,21.035 C12.466,21.124 12.283,21.221 12.107,21.327 C11.928,21.434 11.755,21.550 11.588,21.673 C11.423,21.796 11.263,21.925 11.111,22.062 C10.957,22.199 10.811,22.344 10.672,22.495 C10.532,22.647 10.400,22.804 10.276,22.968 C10.152,23.132 10.036,23.301 9.928,23.476 C9.786,23.706 9.649,23.939 9.537,24.186 C9.511,24.242 9.482,24.295 9.458,24.351 C9.318,24.687 9.210,25.038 9.128,25.400 C9.110,25.479 9.097,25.559 9.082,25.639 C9.012,26.016 8.963,26.401 8.963,26.798 C8.963,27.223 9.010,27.637 9.090,28.039 C9.105,28.113 9.130,28.182 9.147,28.255 C9.218,28.557 9.311,28.850 9.424,29.134 C9.463,29.234 9.504,29.333 9.548,29.430 C9.692,29.744 9.854,30.049 10.046,30.334 C10.060,30.355 10.070,30.378 10.084,30.399 C10.313,30.731 10.573,31.041 10.860,31.325 C10.959,31.423 11.077,31.501 11.183,31.592 C11.382,31.766 11.578,31.944 11.798,32.093 C11.948,32.195 12.116,32.270 12.275,32.359 C12.472,32.469 12.663,32.588 12.873,32.678 C13.052,32.756 13.245,32.804 13.432,32.866 C13.649,32.937 13.862,33.018 14.088,33.066 C14.157,33.081 14.229,33.091 14.299,33.103 C14.683,33.173 15.075,33.221 15.479,33.221 C15.822,33.221 16.152,33.171 16.482,33.121 C16.757,33.079 17.024,33.014 17.288,32.938 C17.458,32.889 17.631,32.845 17.795,32.783 C18.057,32.684 18.305,32.560 18.549,32.430 C18.695,32.352 18.847,32.284 18.986,32.196 C19.237,32.038 19.465,31.851 19.691,31.660 C19.800,31.569 19.919,31.490 20.021,31.392 C20.304,31.120 20.558,30.820 20.787,30.502 C20.813,30.466 20.848,30.436 20.873,30.399 C20.888,30.378 20.898,30.354 20.913,30.332 C21.103,30.048 21.266,29.744 21.409,29.430 C21.454,29.333 21.494,29.233 21.534,29.134 C21.647,28.850 21.739,28.557 21.810,28.256 C21.828,28.183 21.853,28.113 21.867,28.039 C21.947,27.637 21.994,27.223 21.994,26.798 C21.994,26.401 21.946,26.016 21.876,25.639 C21.861,25.559 21.847,25.479 21.829,25.400 C21.748,25.038 21.640,24.687 21.499,24.351 C21.475,24.295 21.446,24.242 21.421,24.187 C21.313,23.948 21.180,23.725 21.044,23.503 C20.911,23.285 20.764,23.078 20.606,22.878 C20.495,22.736 20.382,22.595 20.259,22.463 C20.076,22.268 19.876,22.090 19.670,21.918 C19.543,21.812 19.420,21.701 19.284,21.604 C19.041,21.431 18.778,21.284 18.511,21.145 C18.388,21.081 18.272,21.006 18.144,20.949 C17.806,20.799 17.448,20.686 17.082,20.594 C17.002,20.574 16.928,20.539 16.846,20.522 C16.838,20.521 16.830,20.520 16.823,20.518 C16.389,20.428 15.940,20.375 15.479,20.375 ZM21.586,23.481 C21.575,23.462 21.560,23.446 21.549,23.427 C21.560,23.446 21.573,23.463 21.583,23.481 L21.586,23.481 ZM29.489,12.053 C29.489,11.271 28.844,10.636 28.052,10.636 L17.512,10.636 C16.720,10.636 16.075,11.271 16.075,12.053 C16.075,12.834 16.720,13.469 17.512,13.469 L28.052,13.469 C28.844,13.469 29.489,12.834 29.489,12.053 ZM29.489,18.727 C29.489,17.946 28.844,17.310 28.052,17.310 L17.512,17.310 C16.720,17.310 16.075,17.946 16.075,18.727 C16.075,19.509 16.720,20.144 17.512,20.144 L28.052,20.144 C28.844,20.144 29.489,19.509 29.489,18.727 ZM28.052,23.985 L22.145,23.985 C22.540,24.880 22.739,25.832 22.739,26.819 L28.052,26.819 C28.844,26.819 29.489,26.183 29.489,25.402 C29.489,24.621 28.844,23.985 28.052,23.985 ZM15.754,28.031 L16.382,28.031 L16.382,28.739 L15.754,28.739 L15.754,28.031 ZM12.218,28.262 L14.773,28.262 C14.773,27.657 14.662,27.166 14.434,26.799 C14.159,26.356 13.730,26.125 13.157,26.091 L12.971,26.091 L12.971,25.642 C13.944,25.642 14.614,26.023 14.966,26.785 C15.181,27.241 15.284,27.888 15.284,28.739 L12.218,28.739 L12.218,28.262 ZM17.239,23.518 C17.239,23.171 17.419,22.919 17.805,22.919 C18.102,22.919 18.282,23.062 18.344,23.354 L18.061,23.382 C18.033,23.225 17.951,23.143 17.805,23.143 C17.619,23.143 17.522,23.266 17.522,23.511 C17.522,23.606 17.543,23.688 17.591,23.756 L18.330,23.756 L18.330,24.028 L17.011,24.028 L17.011,23.756 L17.287,23.756 C17.253,23.681 17.239,23.599 17.239,23.518 ZM17.909,28.739 L17.426,28.739 L17.426,24.335 L17.909,24.335 L17.909,28.739 ZM13.605,18.811 L0.829,18.811 C0.372,18.811 -0.001,18.444 -0.001,17.993 L-0.001,0.813 C-0.001,0.361 0.372,-0.006 0.829,-0.006 L13.605,-0.006 C14.063,-0.006 14.435,0.361 14.435,0.813 L14.435,17.993 C14.435,18.444 14.063,18.811 13.605,18.811 ZM13.797,0.813 C13.797,0.709 13.710,0.624 13.605,0.624 L0.829,0.624 C0.724,0.624 0.638,0.709 0.638,0.813 L0.638,17.993 C0.638,18.097 0.724,18.182 0.829,18.182 L13.605,18.182 C13.710,18.182 13.797,18.097 13.797,17.993 L13.797,0.813 ZM12.083,6.228 L2.182,6.228 C2.041,6.228 1.926,6.115 1.926,5.976 L1.926,1.978 C1.926,1.839 2.041,1.726 2.182,1.726 L12.083,1.726 C12.224,1.726 12.338,1.839 12.338,1.978 L12.338,5.976 C12.338,6.115 12.224,6.228 12.083,6.228 ZM3.235,7.576 C3.909,7.576 4.456,8.115 4.456,8.780 C4.456,9.445 3.909,9.984 3.235,9.984 C2.561,9.984 2.014,9.445 2.014,8.780 C2.014,8.115 2.561,7.576 3.235,7.576 ZM3.235,11.013 C3.909,11.013 4.456,11.552 4.456,12.217 C4.456,12.882 3.909,13.420 3.235,13.420 C2.561,13.420 2.014,12.882 2.014,12.217 C2.014,11.552 2.561,11.013 3.235,11.013 ZM3.235,14.637 C3.909,14.637 4.456,15.176 4.456,15.841 C4.456,16.505 3.909,17.044 3.235,17.044 C2.561,17.044 2.014,16.505 2.014,15.841 C2.014,15.176 2.561,14.637 3.235,14.637 ZM7.119,7.576 C7.794,7.576 8.340,8.115 8.340,8.780 C8.340,9.445 7.794,9.984 7.119,9.984 C6.445,9.984 5.899,9.445 5.899,8.780 C5.899,8.115 6.445,7.576 7.119,7.576 ZM7.119,11.013 C7.794,11.013 8.340,11.552 8.340,12.217 C8.340,12.882 7.794,13.420 7.119,13.420 C6.445,13.420 5.899,12.882 5.899,12.217 C5.899,11.552 6.445,11.013 7.119,11.013 ZM7.119,14.637 C7.794,14.637 8.340,15.176 8.340,15.841 C8.340,16.505 7.794,17.044 7.119,17.044 C6.445,17.044 5.899,16.505 5.899,15.841 C5.899,15.176 6.445,14.637 7.119,14.637 ZM11.004,7.576 C11.678,7.576 12.225,8.115 12.225,8.780 C12.225,9.445 11.678,9.984 11.004,9.984 C10.330,9.984 9.783,9.445 9.783,8.780 C9.783,8.115 10.330,7.576 11.004,7.576 ZM11.004,11.013 C11.678,11.013 12.225,11.552 12.225,12.217 C12.225,12.882 11.678,13.420 11.004,13.420 C10.330,13.420 9.783,12.882 9.783,12.217 C9.783,11.552 10.330,11.013 11.004,11.013 ZM11.004,14.637 C11.678,14.637 12.225,15.176 12.225,15.841 C12.225,16.505 11.678,17.044 11.004,17.044 C10.330,17.044 9.783,16.505 9.783,15.841 C9.783,15.176 10.330,14.637 11.004,14.637 Z" />';
+        html += '</svg></i>' + _yourhomeloan.toString() + '<div class="googleMapPopupDirectionBtn"><a href="https://maps.google.com?q=' + latitude + ',' + longitude + '" target="_blank">  Direction </a></div>';
+        html += '</h2> </div> </div><div class="col-md-4 googlepopupHousingamount"><div class="detaildCalcBox"><span>' + _totallAmount + '</span>';
+        html += '<span id="infoSellingPrice" SellingPrice="' + property.SellingPrice + '">   ' + property.SellingPrice + '</span></div></div><div class="col-md-1 detaildCalcIco">';
+        html += '<span>-</span> </div><div class="col-md-3 googlepopupHousingamount"><div class="detaildCalcBox"><span>' + _loanAmount + ' </span>750,000 ' + _AED;
+        html += '</div></div><div class="col-md-1 detaildCalcIco"><span>=</span></div><div class="col-md-3 googlepopupHousingamount"><div class="detaildCalcBox housePayableAmount">';
+        html += '<span>' + _payableAmount.toString() + '</span><span id="PayableAmountInfoWindow" PayableAmount="';
+        html += sellingPrice - 750000 + _AED + '">' + (sellingPrice - 750000) + _AED + ' </span>';
+        html += ' </div></div></div></div>';
+        var location = [];
+        location.push({
+            "lat": parseFloat(latitude),
+            "lng": parseFloat(longitude)
+        })
+        var myLatlng = new google.maps.LatLng(latitude, longitude);
+        addMarkerWithTimeout(myLatlng, html, 1000);
+
+    }
+    var getHouseById = function (local, id) {
+        $http.get("/eservices/" + local + "/HouseBooking/GetHouseBookingDetails?_=" + new Date().getTime() + "&id=" + id).success(function (response) {
+            $scope.HouseList = response;
+            if (response.Success == true) {
+                document.getElementById("HouseView").src = $scope.HouseList.Payload.ThreeDimensionalHouseURL;
+                initProjectMap(local, response.Payload);
+
+            }
+        })
+    };
+    $scope.getHousebyId = function (local) {
+        $scope.selectedHouseId = getParameterByName('id');
+        getHouseById(local, $scope.selectedHouseId)
+    }
+
+    $scope.getRelatedPropertiesDetails = function (local, pageSize = 10, page = 0) {
+        getRelatedPropertiesDetails(local, pageSize, page);
+    }
+    $scope.getHouseFilterList = function (local) {
+        $http.get("/eservices/" + local + "/HouseBooking/GetFilter").success(function (response) {
+            $scope.HouseFilter = response.Payload;
+            $("#Projects").val("0");
+            $("#VillaStyle").val("0");
+            var area = local == 'ar' ? "المساحة :" : "Area :";
+            var price = local == 'ar' ? "السعر :" : "Price :";
+            let _AED = local.toLowerCase() == 'ar' ? ' درهم' : ' AED';
+            $("#slider_range_price").slider({
+                range: true,
+                isRTL: local == 'ar' ? true : false,
+                min: 0,
+                max: (response.Payload == null ? 3000000 : response.Payload.PriceRange.Max),
+                values: [0, (response.Payload == null ? 3000000 : response.Payload.PriceRange.Max)],
+                create: function (event, ui) {
+                    $("#priceMin_value").html(formatMoney((response.Payload == null ? 0 : response.Payload.PriceRange.Min)) + _AED);
+                    $("#priceMax_value").html(formatMoney((response.Payload == null ? 3000000 : response.Payload.PriceRange.Max)) + _AED);
+                    $("#priceMax").html(formatMoney((response.Payload == null ? 3000000 : response.Payload.PriceRange.Max)) + _AED);
+                    $("#priceMin").html(formatMoney((response.Payload == null ? 0 : response.Payload.PriceRange.Min)) + _AED);
+                },
+                slide: function (event, ui) {
+                    $("#priceMin_value").html(ui.values[0] + _AED);
+                    $("#priceMax_value").html(ui.values[1] + _AED);
+
+                },
+                stop: function (event, ui) {
+                    if ((ui.values[0] != "" || ui.values[1] != "") && (ui.values[0] != $scope.HouseFilter.AreaRange.Min || ui.values[1] != $scope.HouseFilter.AreaRange.Max)) {
+                        $(".filterChip.Price").show();
+                        $('.filterChip.Price p').text(price + ui.values[0] + _AED + ' - ' + ui.values[1] + _AED);
+                        $(".houseFilterWrapper").show();
+                    }
+                    else {
+                        $(".filterChip.Area").hide();
+                        if (!$(".filterChip.Price span").is(":visible") && !$(".filterChip.Area span").is(":visible"))
+                            $(".houseFilterWrapper").hide();
+                        else
+                            $(".houseFilterWrapper").show();
+                    }
+                    getRelatedPropertiesDetails(local);
+                }
+            });
+
+            $("#slider_range_space").slider({
+                range: true,
+                isRTL: local == 'ar' ? true : false,
+                min: 0,
+                max: (response.Payload == null ? 3000000 : response.Payload.AreaRange.Max),
+                values: [0, (response.Payload == null ? 3000000 : response.Payload.AreaRange.Max)],
+                create: function () {
+                    var min = formatMoney((response.Payload == null ? 0 : response.Payload.AreaRange.Min));
+                    var max = formatMoney((response.Payload == null ? 3000000 : response.Payload.AreaRange.Max));
+                    $("#spaceMax_value").html(max);
+                    $("#spaceMin_value").html(min);
+                    $("#spaceMax").html(max);
+                    $("#spaceMin").html(min);
+                },
+                slide: function (event, ui) {
+                    $("#spaceMin_value").html(ui.values[0]);
+                    $("#spaceMax_value").html(ui.values[1]);
+                },
+                stop: function (event, ui) {
+                    if ((ui.values[0] != "" || ui.values[1] != "") && (ui.values[0] != $scope.HouseFilter.AreaRange.Min || ui.values[1] != $scope.HouseFilter.AreaRange.Max)) {
+                        $(".filterChip.Area").show();
+                        $('.filterChip.Area p').text((area + formatMoney(ui.values[0]) + _AED + ' - ' + formatMoney(ui.values[1])));
+                        $(".houseFilterWrapper").show();
+                    }
+                    else {
+                        $(".filterChip.Area").hide();
+                        if (!$(".filterChip.Price span").is(":visible") && !$(".filterChip.Area span").is(":visible"))
+                            $(".houseFilterWrapper").hide();
+                        else
+                            $(".houseFilterWrapper").show();
+                    }
+                    getRelatedPropertiesDetails(local);
+                }
+            });
+        })
+    }
+
+    $scope.InitialHousebooking = function (local, paymentMethod) {
+        $scope.selectedHouseId = getParameterByName('id');
+        $http.post("/eservices/" + local + "/HouseBooking/InitialHousebooking?_=" + new Date().getTime() + "&id=" + $scope.selectedHouseId + "&paymentMethod=" + paymentMethod).success(function (response) {
+            if (response.Success == true) {
+                window.location.href = "ReferenceHousingBooking";
+            }
+        })
+    }
+    $scope.ReleaseHousebooking = function (local, id) {
+        $http.post("/eservices/" + local + "/HouseBooking/ReleaseHousebooking?_=" + new Date().getTime() + "&id=" + id).success(function (response) {
+            if (response.Success == true) {
+                $(".houseBookPopOverlay").removeClass("houseBookPopOpen");
+                $(".houseBookExtendPopSecond").hide();
+                $(".houseBookExtendPopfirst").delay(1000).fadeIn();
+                $(".houseBookExtendPopThird").hide();
+                $(".houseBookCancelPop").hide();
+                successMessage(response.Message);
+                if (window.location.href.indexOf('/MyBook') != -1) {
+                    window.location.href = "/eservices/" + local + "/HouseBooking/Index";
+                    return;
+                }
+                getBooking(local);
+            }
+        })
+    }
+    $scope.ExtendHousebooking = function (local, id) {
+        $http.post("/eservices/" + local + "/HouseBooking/ExtendHousebooking?_=" + new Date().getTime() + "&id=" + id).success(function (response) {
+
+            $scope.ExtendHousebooking = response;
+            $(".houseBookExtendPopSecond").hide();
+            $(".houseBookExtendPopfirst").hide();
+            $(".houseBookExtendPopThird").show();
+            $(".houseBookCancelPop").hide();
+            getHouseById(local, id);
+        })
+    }
+    var getBooking = function (local) {
+        $http.get("/eservices/" + local + "/HouseBooking/GetMybooking?_=" + new Date().getTime()).success(function (response) {
+            $scope.HouseList = response;
+            if (response.Success == true) {
+                $scope.HouseList.Payload.BookingDate = $scope.parseJsonDate($scope.HouseList.Payload.BookingDate);
+                $scope.HouseList.Payload.ExtendBookingDate = $scope.parseJsonDate($scope.HouseList.Payload.ExtendBookingDate);
+                $scope.HouseList.Payload.BookingDueDate = $scope.parseJsonDate($scope.HouseList.Payload.BookingDueDate);
+                $('#BookingExpiry').val($scope.HouseList.Payload.BookingDueDate);
+                $('#ExtendBooking').val($scope.HouseList.Payload.ExtendBookingDate);
+                if ($("#HouseView").length)
+                    document.getElementById("HouseView").src = $scope.HouseList.Payload.ThreeDimensionalHouseURL;
+                if (window.location.href.indexOf('/Details') != -1) {
+                    $scope.initProjectsMap(local, response.Payload)
+                }
+                $('.paymentFailMsg').hide();
+                $('.paymentErrStep').hide();
+                $('.bankLoneProgressBarStart2Span').show();
+            }
+            else {
+                $('.paymentFailMsg').show();
+                $('.paymentErrStep').show();
+                $('.bankLoneProgressBarStart2Span').hide();
+            }
+        })
+    }
+    $scope.GetMybooking = function (local) {
+        getBooking(local);
+    }
+
+    $scope.parseJsonDate = function (jsonDateString) {
+        return new Date(parseInt(jsonDateString.substr(6))).format("dd/mm/yyyy");
+    }
+
+
+    $scope.confirmHouseBooking = function (local, ConfirmBookingModel) {
+        $scope.ConfirmBookingModel.PropertyId = $scope.HouseList.Id;
+        $scope.ConfirmBookingModel.HousingRecptDate = new Date($scope.ConfirmBookingModel.HousingRecptDate);
+        $http.post("/eservices/" + local + "/HouseBooking/ConfirmHouseBooking?_=" + new Date().getTime(), { houseBookingModel: $scope.ConfirmBookingModel }).success(function (response) {
+            if (response.Success == true) {
+                alert(response.Message);
+            }
+        })
+    }
+
+    $scope.EPayRegister = function (local, ePayRegisterModel) {
+        $scope.ePayRegisterModel = {
+            PropertyId: getParameterByName('id'),
+            EmailAddress: $("#emailAddress").val(),
+            MobileNo: $("#MobileNo").val(),
+            Name: $("#name").val(),
+            Amount: 50000
+        };
+        $http.post("/eservices/" + local + "/HouseBooking/EPayRegister?_=" + new Date().getTime(), { ePayRegisterModel: $scope.ePayRegisterModel }).success(function (response) {
+            if (response.Success == true) {
+                window.location.href = response.Payload.RedirectionUrl;
+            }
+        })
+    }
+    $scope.EPayCompleted = function (local) {
+        var Epaytrans = getParameterByName('sptrn');
+        if (Epaytrans) {
+            $scope.selectedHouseId = getParameterByName('sptrn');
+            $http.post("/eservices/" + local + "/HouseBooking/EPayCompleted?_=" + new Date().getTime() + "&sptrn=" + $scope.selectedHouseId).success(function (response) {
+                $scope.HouseList = response;
+                if (response.Success == true) {
+                    $scope.HouseList.BookingDate = $scope.parseJsonDate($scope.HouseList.Payload.BookingDate);
+                    $('.paymentFailMsg').hide();
+                    $('.paymentErrStep').hide();
+                    $('.bankLoneProgressBarStart2Span').show();
+                }
+                else {
+                    $('.paymentFailMsg').show();
+                    $('.paymentErrStep').show();
+                    $('.bankLoneProgressBarStart2Span').hide();
+                }
+            })
+        }
+        else {
+            $scope.GetMybooking(local);
+        }
+    }
+    $scope.GenerateReferenceBookingPDF = function (local, HouseList) {
+
+        var model = {
+            template: "",
+            Title: HouseList.ReferenceNo,
+            Date: HouseList.BookingDate,
+            ReferenceNumber: HouseList.ReferenceNo,
+            AccountName: HouseList.ReferenceNo,
+            BankName: HouseList.ReferenceNo,
+            Iban: HouseList.ReferenceNo,
+            ProjectName: HouseList.ProjectName,
+            Region: HouseList.LandLocation,
+            Floors: HouseList.Floor,
+            BedRooms: HouseList.Bedroom,
+            DesignType: HouseList.VillaStyle,
+            Area: HouseList.BasedArea,
+            SellingPrice: HouseList.SellingPrice.replace(/(AED)/, "").replace("(", "").replace(")", ""),
+            BookingAmount: HouseList.BookingAmount.replace(/(AED)/, "").replace("(", "").replace(")", ""),
+            LoanAmount: HouseList.LoanAmount.replace(/((AED))/, "").replace("(", "").replace(")", ""),
+            RemainingAmount: HouseList.RemainingAmount.replace(/(AED)/, "").replace("(", "").replace(")", "")
+        };
+        $http.post("/eservices/" + local + "/HouseBooking/GenerateReferenceBookingPDF?_=" + new Date().getTime(),
+            { refereanceBookingModel: model }
+        ).success(function (response) { 
+            if (response.Success == true) {
+                window.open(
+                    response.Message,
+                    '_blank' // <- This is what makes it open in a new window.
+                );
+            }
+        })
+
+    }
+    $scope.createCORSRequest = function (method, url) {
+        var xhr = new XMLHttpRequest();
+        if ("withCredentials" in xhr) {
+
+            // Check if the XMLHttpRequest object has a "withCredentials" property.
+            // "withCredentials" only exists on XMLHTTPRequest2 objects.
+            xhr.open(method, url, true);
+
+        } else if (typeof XDomainRequest != "undefined") {
+
+            // Otherwise, check if XDomainRequest.
+            // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+            xhr = new XDomainRequest();
+            xhr.open(method, url);
+
+        } else {
+
+            // Otherwise, CORS is not supported by the browser.
+            xhr = null;
+
+        }
+        var reult = xhr.responseText;
+        return xhr;
+    }
+});

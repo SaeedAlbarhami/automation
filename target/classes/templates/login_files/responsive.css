@@ -1,0 +1,1464 @@
+@media screen and (max-width: 1199px) {
+    .contractorPaymentChartBoxDetais a.rejectBtn,
+    .contractorPaymentChartBoxDetais input.rejectBtn,
+    .contractorPaymentChartBoxDetais a.acceptBtn,
+    .contractorPaymentChartBoxDetais input.acceptBtn {
+        margin: 10px 5px !important;
+    }
+
+    .contractorPaymentChartBoxDetais span {
+        display: block;
+    }
+
+    .contractorPaymentChartBoxDetais p {
+        padding-top: 40px !important;
+    }
+
+    .user_informatiom_wrapper {
+        width: 28%;
+    }
+
+    .menu_center {
+        width: 55%;
+    }
+}
+
+@media screen and (max-width: 1025px) {
+
+    span.houseBookingWedBtn {
+        display: inline-block;
+        width: 31%;
+         margin: 1%; 
+    }
+
+
+    .extendBookPopupContant {
+        width: 75%;
+    }
+
+    .myBooktWraper {
+        padding-top: 75px;
+        padding-bottom: 75px;
+    }
+
+    .bookingHouseTile.col-md-12 .houseDetailsSplace,
+    .bookingHouseTile.col-md-12 .houseDetailsSize,
+    .bookingHouseTile.col-md-12 .houseDetailsBed,
+    .bookingHouseTile.col-md-12 .houseDetailsStory {
+        margin: 0px 2px;
+    }
+
+    .Bookingtitle {
+        padding-bottom: 15px;
+    }
+
+    .accordion_box {
+        width: 23%;
+        margin-top: 20px;
+    }
+
+    .add_button {
+        visibility: visible !important;
+    }
+
+    .activity,
+    .order_history {
+        font-size: 12px;
+    }
+
+    .awarnessesBox {
+        height: 150px;
+    }
+
+    .awarenessTxt {
+        height: 92px;
+        overflow-y: auto;
+    }
+
+    login_fotter_left .otpPassword {
+        background-image: none;
+    }
+
+    /*********************/
+    .wizard ul,
+    .tabcontrol ul {
+        width: 100%;
+    }
+
+    .dropify-wrapper {
+        width: 42%;
+        margin: 4%;
+    }
+
+    .fileUploadArea > p {
+        font-size: 1.5vw;
+    }
+
+    .emiratesIdIcon span {
+        font-size: 2.3vw;
+    }
+
+    .stepHead {
+        font-size: 1.5vw;
+    }
+}
+
+
+@media screen and (max-width: 991px) {
+
+    .housebookDetails.DetailsHouse .housebookDetailsbox {
+        padding: 0px 20px;
+    }
+
+    .widgetdonthavBookingWrapper span {
+        display: block;
+    }
+
+        .widgetdonthavBookingWrapper span svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+    .widgetdonthavBookingWrapper a {
+        margin-top: 0px;
+    }
+
+    .Bookingtabs > label {
+        background: #f3f3f3;
+        border-bottom: 1px solid #b8b8b8;
+        border-radius: 6px;
+    }
+
+    .Bookingtabs .bktab,
+    .Bookingtabs label {
+        order: initial;
+    }
+
+    .bookingLocationMapNd3dTab .Bookingtabs > label,
+    .Bookingtabs label {
+        width: 100%;
+        margin-right: 0;
+        margin-top: 0.2rem;
+    }
+
+    .Bookingtabs input[type="radio"]:checked + label {
+        border-radius: 6px 6px 0px 0px;
+        border-bottom:0px;
+    }
+
+    .houseBookWedBottomBtns a {
+        height: auto;
+        line-height: initial;
+        padding: 15px 0px;
+        margin-bottom: 30px;
+    }
+
+        .houseBookWedBottomBtns a span:first-child,
+        .houseBookWedBottomBtns a span {
+            display: block;
+            width: 100%;
+        }
+
+        .houseBookWedBottomBtns a svg {
+            position: relative;
+            margin-top: 0px;
+            left: auto;
+            transform: none;
+        }
+
+    .bookingFileUploadBox .dropify-wrapper {
+        margin: auto;
+        width: 100%;
+    }
+
+    .houseBkBtn {
+        width: 100%;
+    }
+
+
+    .detaildCalcIco {
+        display: inherit;
+        height: auto;
+    }
+
+        .detaildCalcIco span {
+            display: inherit;
+            vertical-align: middle;
+        }
+
+    .detaildCalcBox {
+        text-align: center;
+    }
+
+    .applicationDetails .application_box {
+        margin-bottom: 30px;
+        min-height: inherit;
+    }
+
+    .gallery .full {
+        height: 390px;
+    }
+
+    .DetailsSidePanalImage,
+    .myBookImg {
+        text-align: center;
+        height: auto;
+    }
+
+    .myBookDetailsBox h2 {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .DetailsSidePanal h2,
+    .DetailsSidePanal p,
+    .myBookDetailsBox p {
+        text-align: center;
+    }
+
+    .bookingHouseTile.col-md-12 .houseImage {
+        width: auto;
+        height: 252px;
+        float: none;
+        border-radius: 6px 6px 0px 0px;
+    }
+
+    .bookingHouseTile.col-md-12 .houseDetailsWrapper {
+        float: none;
+        width: auto;
+        border-right: 0px solid #ddd;
+    }
+
+    .bookingHouseTile.col-md-12 .houseBookingBox {
+        padding: 0px;
+    }
+
+    .bookingHouseTile.col-md-12 .houseBtns {
+        float: none;
+        width: auto;
+        text-align: center;
+    }
+
+    .bookingHouseTile.col-md-12 .houseDetailsSplace,
+    .bookingHouseTile.col-md-12 .houseDetailsSize,
+    .bookingHouseTile.col-md-12 .houseDetailsBed,
+    .bookingHouseTile.col-md-12 .houseDetailsStory {
+        float: left;
+        width: 50%;
+        margin: 0px;
+        height: 31px;
+    }
+
+    .bookingHouseTile.col-md-12 .housePrice,
+    .bookingHouseTile.col-md-12 .houseBtnsBooknow,
+    .bookingHouseTile.col-md-12 .houseBtnsDetails {
+        padding: 0px;
+    }
+
+    .bookingHouseTile.col-md-12 .houseBtnsBooknow,
+    .bookingHouseTile.col-md-12 .houseBtnsDetails {
+        width: 44%;
+        float: left;
+        text-align: center;
+        margin: 3%;
+    }
+
+    .productViewBtn,
+    .bookingHouseTile.col-md-12 .housePrice,
+    .bookingHouseTile.col-md-12 .houseDescription,
+    .houseDetailsSplace,
+    .houseDetailsSize {
+        display: none;
+    }
+
+    .bookingHouseTile.col-md-12 .houseImageOverPrice {
+        display: block;
+    }
+
+    #editProvider #wizard > ul > li span, #NewProvider #wizard > ul > li span {
+        width: 95%;
+        height: 65px;
+    }
+
+    #editProvider #wizard .content, #NewProvider #wizard .content {
+        padding: 0px;
+    }
+
+
+    .userSelectWraper {
+        height: auto;
+        width: 100%;
+        padding: 10px;
+        margin: auto;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+
+        .userSelectWraper .userSelectBox:first-child {
+            border-right: 0px solid #dddddd;
+            border-bottom: 1px solid #dddddd;
+            border-left: 0px solid #dddddd;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+        }
+
+        .userSelectWraper:after {
+            content: "";
+            clear: both;
+            display: block;
+        }
+
+    .userSelectBut {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+    }
+
+    .userSelectBox:after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+
+    .contractorPaymentChartBoxWrapper {
+        text-align: center;
+    }
+
+    .contractorPaymentChartBoxDetais p {
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
+    }
+
+
+    .login_fotter_right {
+        margin-bottom: 15px !important;
+    }
+
+    .LoginImage {
+        display: none;
+    }
+
+    .login_contant {
+        width: 45% !important;
+    }
+
+    .nodata_wrapper {
+        text-align: center;
+    }
+
+    .user_name {
+        width: auto;
+    }
+
+    .menu_center {
+        width: 93%;
+    }
+
+    .user_name {
+        font-size: 0px;
+    }
+
+    .logo2 {
+        display: block;
+    }
+
+    /*.logo_wrapper {
+        display: none;
+    }*/
+
+    .search {
+        height: 51px;
+        width: 70%;
+        padding-right: 2%;
+        padding-left: 2%;
+    }
+
+    .dashboard {
+        width: 6%;
+        font-size: 0px;
+    }
+
+        .dashboard:before {
+            display: none;
+        }
+
+    .order_history,
+    .activity {
+        width: 12%;
+        font-size: 0px;
+    }
+
+    .menu_center_bg {
+        width: 77%;
+    }
+
+    .search2 {
+        width: 39%;
+    }
+
+    .user_informatiom_wrapper2 {
+        width: 17%;
+    }
+
+    .timeline-item:after {
+        left: calc(93% + 16.6%);
+    }
+
+    .timeline-item_active:before {
+        left: calc(93% - -18.5%);
+    }
+
+    .timeline_year_right:after {
+        left: calc(100% + -145.5%);
+    }
+
+    .timeline-item_right:after {
+        left: calc(100% + -118.5%);
+    }
+
+    .timeline-item_active_right:before {
+        left: calc(100% - 116.5%);
+    }
+
+    .responsive_margin_bottom {
+        margin-bottom: 10px;
+    }
+
+    .accordion_box {
+        width: 31.3%;
+        margin-top: 20px;
+    }
+}
+
+@media screen and (max-width: 960px) {
+
+    .myIdLogIcon a {
+        display: block;
+        height: 105px;
+        width: 100%;
+    }
+
+    .footer {
+        text-align: center;
+    }
+
+        .footer .appIcon {
+            /*width: 133px;*/
+            float: left;
+            text-align: center;
+            padding: 0px;
+        }
+
+    login_fotter_left .otpPassword {
+        background: url(../../images/otp_icon.png) no-repeat right center #cf242e;
+    }
+
+    .acc_wrapper {
+        float: none;
+        width: 100%;
+    }
+
+    .nav {
+        float: left;
+        width: 100%;
+        background: #FBFBFB;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+
+    .menu > ul > li {
+        background-image: none !important;
+        border-top: 0px solid #ccc;
+        background-color: #F9F8F8 !important;
+    }
+
+    .head_top_left {
+        padding-bottom: 10px;
+    }
+
+        .head_top_left:after {
+            content: "";
+            clear: both;
+            display: block;
+        }
+
+    .nav_bottom {
+        float: left;
+    }
+
+    .QRside {
+        position: static;
+        left: inherit;
+        top: inherit;
+        float: right;
+        margin-top: -10px;
+    }
+
+    .timeline-item:after {
+        left: calc(93% + 16.6%);
+    }
+
+    .timeline-item_active:before {
+        left: calc(93% - -19%);
+    }
+
+    .timeline_year_right:after {
+        left: calc(100% + -143%);
+    }
+
+    .timeline-item_right:after {
+        left: calc(100% + -121%);
+    }
+
+    .timeline-item_active_right:before {
+        left: calc(100% - 118.5%);
+    }
+
+    .responsive_margin_bottom {
+        margin-bottom: 10px;
+    }
+
+    .QRside {
+        position: static;
+        left: inherit;
+        top: inherit;
+        float: right;
+        margin-top: -10px;
+    }
+}
+
+@media screen and (max-width: 769px) {
+    .housebookDetails.PaymentHouse .housebookDetailsbox,
+    .housebookDetails.DetailsHouse .housebookDetailsbox {
+        padding: 10px 0px;
+        width: 100%;
+    }
+    
+
+    span.houseBookingWedBtn {
+        display: inline-block;
+        width: 100%;
+        margin: 0%;
+    }
+
+    .fixed {
+        position: relative;
+    }
+
+    .height {
+        padding-top: 10px !important;
+    }
+
+    .loginSelector {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+
+    .linkAccPopupBox.accLinkYesWrapper {
+        width: 590px;
+    }
+
+    .accLinkStepFormWrapper {
+        width: 100%;
+    }
+
+    .customer_section .login_formArea {
+        height: auto;
+        border: none;
+    }
+
+    .displaynone {
+        display: block;
+        transform: scale(1);
+    }
+
+    #editProvider #wizard ul.anchor li:after, #NewProvider #wizard ul.anchor li:after,
+    #editProvider #wizard > ul > li span, #NewProvider #wizard > ul > li span {
+        display: none;
+    }
+
+    #editProvider #wizard > ul, #NewProvider #wizard > ul,
+    #editProvider #wizard > ul.anchor li, #NewProvider #wizard > ul.anchor li {
+        height: 31px;
+    }
+
+    #editProvider #wizard ul.anchor li a.selected:after, #NewProvider #wizard ul.anchor li a.selected:after {
+        transform: translate(-50%);
+    }
+
+    .application_box .applicationBoxIn {
+        margin: auto;
+        width: 100%;
+    }
+
+    .modifyNotification {
+        margin-top: 6px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .modifyTicketNo {
+        width: 100%;
+        padding-top: 0px;
+        float: none;
+        text-align: center;
+    }
+
+    .modifyTime {
+        width: 100%;
+        float: none;
+        text-align: center;
+    }
+
+    .contract_Project_step_table_header {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 100px !important;
+        z-index: 100 !important;
+    }
+
+    .LoginType .MyIdLoginIn {
+        width: 45%;
+        margin: auto;
+    }
+
+    .add_newrequest:before {
+        display: none;
+    }
+
+    .user_informatiom_wrapper {
+        width: 100%;
+        float: right !important;
+    }
+
+    .menu_center_bg {
+        width: 93%;
+    }
+
+    .dashboard {
+        width: 7%;
+    }
+
+        .dashboard span {
+            padding-left: 10px;
+        }
+
+        .dashboard:before {
+            content: "";
+            display: none;
+        }
+
+    .dashbard_icon {
+        margin: auto !important;
+        float: none;
+    }
+
+    .notification h3[data-badge]:after {
+        right: 15px;
+    }
+
+    .gov_logo,
+    .mrhe_logo {
+        text-align: center;
+        padding-bottom: 10px;
+    }
+
+    .service_head_title_wrapper {
+        text-align: center;
+    }
+
+    .menu > ul > li {
+        background-image: none !important;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .QRside {
+        width: 100%;
+        position: static !important;
+        left: inherit;
+        top: inherit;
+        margin-top: 0px;
+        text-align: center;
+    }
+
+    .language {
+        position: absolute;
+        right: 16px;
+        top: -81px;
+    }
+
+    .nav_bottom_sticky {
+        width: 100%;
+    }
+
+    .nav_wrapper_sticky,
+    .nav_bottom_sticky {
+        width: 100%;
+        animation-name: nav_wrapper;
+        animation-duration: 500ms;
+        animation: none;
+    }
+
+    @-webkit-keyframes nav_wrapper {
+        0% {
+            width: 0px;
+        }
+
+        100% {
+            width: 100%;
+        }
+    }
+
+    .top_icons2 {
+        width: 31%;
+    }
+
+    .sidepanel_resize_button {
+        display: none;
+    }
+
+    .QRwrapper {
+        top: -326px;
+        margin-left: -187px;
+        left: 50%;
+        overflow-y: hidden;
+        box-shadow: 0px 0px 2px #ddd;
+        transition: all 0.5s ease;
+        -webkit-transition: all 0.5s ease;
+        -moz-transition: all 0.5s ease;
+        -ms-transition: all 0.5s ease;
+    }
+
+    .QRopen {
+        top: 50%;
+        left: auto;
+    }
+
+    .QRbut {
+        left: 0;
+        right: auto;
+        bottom: 0;
+        margin-top: 0;
+        top: auto;
+        cursor: pointer;
+        position: fixed;
+        border-radius: 0px;
+    }
+
+    .QRopen {
+        left: 50%;
+        margin-left: -187px;
+    }
+
+    .QRwrapperBack {
+        background: rgba(0, 0, 0, 0.54);
+        animation-name: QRback;
+        animation-duration: 1s;
+    }
+
+    @keyframes QRback {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @-webkit-keyframes QRback {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .messageBoxSuccus,
+    .messageBoxFail,
+    .messageBack {
+        text-align: center;
+    }
+
+    .messageBoxSuccus,
+    .messageBoxFail {
+        margin-top: 15px;
+        word-break: break-all;
+    }
+
+    .accordion_box {
+        width: 47.6%;
+        margin-top: 20px;
+    }
+
+    .timeline:before,
+    .timeline:after {
+        display: none;
+    }
+
+    .timelineWrapper {
+        display: table;
+    }
+
+    .timelineItem {
+        width: 100%;
+        float: none;
+    }
+
+    .timelineDetails {
+        width: 100%;
+        float: none;
+    }
+
+    .timelineYearSection:after,
+    .timelineItemActive:after,
+    .timelineWrapper:before {
+        display: none;
+    }
+
+    .timeLineYear,
+    .timeLineYearSide {
+        right: auto;
+        left: auto;
+        position: static;
+        margin: auto;
+    }
+
+    .widgetsClose {
+        top: 13px !important;
+    }
+
+    .application_box {
+        border-top: 1px dashed #dfdfdf;
+    }
+
+    /*.application_box:first-child {
+            border-top: 0px;
+        }*/
+
+    .acc_head img,
+    .acc_icon_expand {
+        display: none !important;
+    }
+
+    .myMaintenanceRequestsWrapper {
+        border: none;
+    }
+
+    .forgetPasswordMyId,
+    .RegisterNew {
+        text-align: center;
+    }
+
+    .MyIdLogin {
+        padding-bottom: 5px;
+    }
+
+    .forgetPasswordMyId a {
+        padding-bottom: 32px !important;
+        display: inline-block;
+    }
+
+    .center_border:after {
+        content: "";
+        width: 1px;
+        height: 80%;
+        position: absolute;
+        left: 0px;
+        top: 10%;
+        background: none;
+    }
+
+    .center_border {
+        border-bottom: 2px solid #dfdfdf;
+        margin-bottom: 10px;
+    }
+
+    .popup {
+        text-align: center;
+    }
+
+    .nameAttachFile {
+        text-align: start;
+    }
+    /************************/
+
+    .fileUploadArea > p {
+        text-align: center;
+    }
+
+    .emiratesIdIcon span {
+        font-size: 20px;
+    }
+
+    .fileUploadArea > p {
+        font-size: 16px;
+    }
+
+    .wizard > .steps > ul > li.done:after {
+        width: 76%;
+    }
+
+    .wizard, .tabcontrol {
+        width: 100%;
+    }
+}
+
+/*****************************/
+
+@media screen and (max-width: 700px) {
+
+    .houseBookWedRemainingDateTextIn{
+        margin:auto;
+    }
+
+    .hBkPrintBtnWrapper a {
+        width: 96%;
+        margin-top: 10px !important;
+        text-align: center;
+    }
+    
+    .bankLoneProgressBar {
+        width: 75%;
+    }
+        .bankLoneProgressBarStart2, .bankLoneProgressBarStart1 {
+        position: absolute;
+        top: -36px;
+        display: block;
+        padding: 0;
+        white-space: nowrap;
+        left: 50%;
+        transform: translate(-50%);
+    }
+    .widgetApplicationStatusWrapper {
+        height: 274px;
+        text-align: center;
+    }
+
+    .widgetLinkAccountCenterContainer {
+        width: 100%;
+    }
+
+    .houseBookWedRemainingDateIcon {
+        width: 100%;
+        text-align: center;
+    }
+
+    .houseBookWedRemainingDateText {
+        width: 100%;
+        padding-top: 22px;
+        text-align: center;
+    }
+
+    .housBookWedgDetials {
+        text-align: center;
+    }
+
+    .houseBookPop {
+        min-width: initial;
+        width: 95%;
+    }
+
+    .houseBookCancelPop,
+    .houseBookExtendPopThird,
+    .houseBookExtendPopSecond,
+    .houseBookExtendPopfirst {
+        width: 100%;
+    }
+
+    .houseBookBtnCenter input[type="submit"] {
+        margin-bottom: 15px;
+    }
+
+    .bookingRefrwedgHead {
+        height: auto !important;
+        line-height: 35px !important;
+    }
+
+        .bookingRefrwedgHead .hBookresDt,
+        .bookingRefrwedgHead .hBookrefNo {
+            text-align: center;
+        }
+
+    input[type="submit"].houseBkSaveBtn, input[type="submit"].houseBkPrintBtn {
+        width: 46%;
+        margin: 2% !important;
+    }
+
+    .housebookDetails .housebookDetailsbox {
+        padding: 3px;
+    }
+
+    .centerCheckbox {
+        position: absolute;
+        left: auto;
+        transform: translate(0%, 0%);
+    }
+
+    .bookingCenterForm {
+        width: 100%;
+    }
+
+
+    .editConformationWrapper {
+        width: 100%;
+    }
+
+    .Breadcrumb ul {
+        padding: 14px;
+        margin: 0px;
+        color: #2e506a;
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+    .stepHead {
+        display: none;
+    }
+
+    .wizard > .content {
+        margin: 0px;
+    }
+
+    .dropify-wrapper {
+        width: 100%;
+        margin: auto;
+        margin-bottom: 15px;
+    }
+
+    .myBookBtn, .productViewBtn {
+        float: none;
+        width: 120px;
+    }
+
+    .filterChipWrapper {
+        padding-bottom: 15px;
+    }
+
+    .bookingHouseTile {
+        font-size: 16px;
+    }
+}
+
+@media only screen and (max-width:767px) {
+
+
+    .customer_section .login_formArea,
+    .contractor_section .login_formArea,
+    .contractor_section .login_header,
+    .customer_section .login_header {
+        border-radius: 0px 0px 0px 0px !important;
+    }
+
+    .contractor_section .login_header,
+    .customer_section .login_header {
+        border: 1px solid #ccc !important;
+    }
+
+    .contractor_section .login_header {
+        margin-top: 30px;
+    }
+
+    .headerImg {
+        border-radius: 0px !important;
+    }
+
+    .customer_section .LoginSection {
+        border-right: none !important;
+    }
+}
+
+@media only screen and (max-width:735px) {
+
+    .login_wrapper {
+        width: 100% !important;
+    }
+
+    .loginSelector ul li{
+        font-size:18px;
+    }
+    .uaePassBtn img {
+        transform: scale(0.9);
+    }
+
+    .logincolSection {
+        padding: 30px;
+    }
+
+    .login_wrapper,
+    .login_container {
+        height: auto;
+    }
+
+    .logo_wrapper .mrhe,
+    .logo_wrapper .gov {
+        text-align: center;
+        margin-bottom: 15px;
+        float: none;
+    }
+
+    .LoginType .MyIdLoginIn {
+        width: 80%;
+        margin: auto;
+    }
+
+    .center_border {
+        border: none;
+    }
+
+    .lginIn_box {
+        width: 100%;
+        height: auto;
+        float: none;
+    }
+
+    .center_border {
+        border-bottom: 2px solid #dfdfdf;
+        margin-bottom: 10px;
+    }
+
+    .user_arrow {
+        display: none;
+    }
+
+    .awarnessesBox {
+        height: auto;
+    }
+
+}
+
+@media screen and (max-width: 643px) {
+
+    .login_contant {
+        width: 80% !important;
+    }
+
+    .footer {
+        position: static;
+    }
+
+    .center {
+        padding-bottom: 10px;
+    }
+
+    .head_home {
+        display: none;
+    }
+
+    .language_head {
+        width: 102px !important;
+        padding-left: 10px;
+        background: none;
+        width: 15%;
+        float: right;
+        font-size: 16px;
+        line-height: 39px;
+        color: #fff;
+    }
+
+    .linkAccount {
+        width: 95%;
+        min-width: auto;
+    }
+
+    #linkaccountLink0, #linkaccountLink2 {
+        width: 100%;
+    }
+
+    .linkAccPopupBox.accLinkYesWrapper {
+        width: 100%;
+    }
+
+    .accLinkStepFormWrapper input[type="submit"] {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .accLinkYesStepDotWrap .accLinkYesStepDotSt1 span, .accLinkYesStepDotWrap .accLinkYesStepDotSt2 span, .accLinkYesStepDotWrap .accLinkYesStepDotSt3 span {
+        width: 137px;
+        font-size: 13px;
+    }
+
+    .nameAttachFile {
+        width: 100% !important;
+        padding-bottom: 10px;
+    }
+
+    .dashboard {
+        width: 16%;
+        font-size: 0px;
+    }
+
+    .dashbard_icon {
+        margin: auto;
+        float: none;
+        margin-right: auto !important;
+        margin-left: auto !important;
+    }
+
+    .order_history {
+        width: 18%;
+        font-size: 0px;
+    }
+
+    .menu_center_bg {
+        width: 90%;
+    }
+
+    .menu_center {
+        width: 84%;
+    }
+
+    .home,
+    .dubai {
+        width: 50%;
+        height: 30px;
+    }
+
+    .user_name {
+        width: 100%;
+        float: left;
+        height: 30px;
+    }
+
+    .head_top_left:after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+
+    .dash_board_link h3 {
+        display: none;
+    }
+
+    .footer a {
+        display: block;
+        text-align: center;
+    }
+
+    .accordion_box {
+        width: 100%;
+        padding: 0px;
+        margin: 12px 0px 25px 0px;
+    }
+
+    .service_head_title_wrapper {
+        height: auto;
+        line-height: 20px;
+        border-bottom: 1px solid #ddd;
+    }
+
+        .service_head_title_wrapper img {
+            display: none;
+        }
+
+    .nav_wrapper {
+        height: auto;
+    }
+
+    .page_name {
+        display: none;
+    }
+
+    .top_icons {
+        width: 100%;
+    }
+
+        .top_icons > ul > li {
+            min-width: 14%;
+        }
+
+            .top_icons > ul > li:last-child {
+                /*min-width: 40%;*/
+                min-width: 14%;
+                background: none;
+            }
+
+    .timeline_details_contant table tr td {
+        float: left;
+        width: 100%;
+    }
+
+    .successContent {
+        width: 46%;
+    }
+    /*.application_col-right {
+            text-align:inherit !important;
+        }*/
+    .application_col-left:before,
+    .application_col-left:after {
+        content: none !important;
+    }
+
+
+    .myMaintenanceRequests_section {
+        width: 100% !important;
+    }
+
+    .add_newrequest a {
+        padding: 15px 10px;
+    }
+
+    .awarenessTxt {
+        height: auto;
+        overflow-y: auto;
+    }
+}
+
+@media only screen and (max-width:430px) {
+
+    .login_img,
+    .login_img_right {
+        display: none;
+    }
+
+    .login_section,
+    .login_section_right {
+        width: 100%;
+    }
+
+    .top_icons2 {
+        width: 58%;
+        font-size: 13px;
+        padding-right: 5%;
+        padding-left: 5%;
+    }
+
+    .logo2 {
+        display: block;
+        margin-right: 2%;
+        margin-left: 2%;
+    }
+
+    .search2 {
+        width: 30%;
+    }
+
+    .container {
+        padding-right: 0px;
+        padding-left: 0px;
+    }
+
+    .QRwrapper {
+        width: 100%;
+        left: 0;
+        margin-left: 0px;
+        overflow: visible;
+    }
+
+    .qrinfowrapper {
+        width: 100%;
+    }
+
+    .successContent {
+        width: 100%;
+    }
+
+    .housingRequest_section {
+        width: 100%;
+        float: none;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    .service_head_title_wrapper span {
+        padding-left: 0px;
+    }
+
+    .eligible_serviceMsg {
+        text-align: center;
+    }
+
+    .activity,
+    .order_history {
+        padding: 0px;
+    }
+
+    .timelineDetailsTitleWrapper {
+        font-size: 12px;
+    }
+
+    .timeLineYear {
+        width: 100%;
+        height: 50px;
+        right: 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background: #8BC34A;
+    }
+
+    .timelineWrapper {
+        padding-top: 0px;
+    }
+
+    .application_col-left,
+    .application_col-right {
+        text-align: center;
+    }
+
+    .awarnessesBox {
+        height: auto;
+    }
+
+    .awarnessesimages,
+    .awarnessesContant {
+        width: 100%;
+    }
+
+        .awarnessesContant h1,
+        .awarnessesContant p {
+            text-align: center;
+        }
+
+    .accR, .shareR {
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+
+    .fotter_links ul li {
+        width: 100%;
+        border: none !important;
+    }
+
+    .swMain ul.anchor li {
+        font-size: 0px;
+    }
+
+        .swMain ul.anchor li:before {
+            content: "";
+            width: 100%;
+            height: 1px;
+            background: #ccc;
+            left: 0;
+            top: 50%;
+            position: absolute;
+        }
+
+    .stepFormSection {
+        text-align: center;
+    }
+
+        .stepFormSection .uploadEditButt {
+            width: 100%;
+            padding-left: 0px;
+            border-bottom: 3px solid #fdfdfd;
+            background: #ebebeb;
+        }
+
+    .awarenessTxt {
+        height: auto;
+        overflow-y: auto;
+        text-align: center;
+    }
+}

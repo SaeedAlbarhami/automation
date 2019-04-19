@@ -1,0 +1,6 @@
+ae\gov\ui\SampleWebUiApplication$1.class
+ae\gov\ui\SampleWebUiApplication.class
+ae\gov\ui\Message.class
+ae\gov\ui\mvc\MessageController.class
+ae\gov\ui\MessageRepository.class
+ae\gov\ui\InMemoryMessageRespository.class

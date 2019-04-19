@@ -1,0 +1,113 @@
+.SimpleChart {
+    position: relative;
+}
+
+.SimpleChart #tip {
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    position: absolute;
+    left: -200px;
+    top: 30px;
+}
+
+.down-triangle {
+    width: 0;
+    height: 0;
+    border-top: 10px solid #d0d0d0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    position: absolute;
+    left: -200px;
+}
+
+.SimpleChart #highlighter {
+    position: absolute;
+    left: -200px;
+}
+
+.-simple-chart-holder {
+    float: left;
+    position: relative;
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #cecece;
+    /*padding: 6px;*/
+}
+
+.SimpleChart .legendsli {
+    list-style: none;
+}
+
+.SimpleChart .legendsli span {
+    float: left;
+    vertical-align: middle;
+}
+
+.SimpleChart .legendsli span.legendindicator {
+    position: relative;
+    top: 5px;
+}
+
+.SimpleChart .legendsli span.legendindicator .line {
+    width: 30px;
+    height: 3px;
+}
+
+.SimpleChart .legendsli span.legendindicator .circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 20px;
+    position: relative;
+    top: -5px;
+    right: 20px;
+}
+
+
+/******Starts::Horizontal Alignment of Legends******/
+
+.simple-chart-legends {
+    background: #E7E7E7;
+    border: 1px solid #d6d7dd;
+    padding: 5px;
+    margin: 2px 0px;
+}
+
+.simple-chart-legends ul {}
+
+.simple-chart-legends ul li {
+    display: inline;
+    border-right: 1px solid #d6d7dd;
+    float: left;
+    padding: 10px;
+}
+
+.simple-chart-legends ul li:last-child {
+    border-right: 0px;
+}
+
+.simple-chart-legends.vertical {
+    margin: 0px 10px;
+}
+
+.simple-chart-legends.vertical ul li {
+    display: block;
+    border: 0px;
+    border-bottom: 1px solid #d6d7dd;
+}
+
+.simple-chart-legends.vertical ul li:last-child {
+    border-bottom: 0px;
+}
+
+.simple-chart-legends .legendvalue {
+    padding-left: 2px;
+    background: #fff;
+}
+
+
+/******Starts::Horizontal Alignment of Legends******/
+
+.simple-chart-Header {
+    position: absolute;
+    font-size: 16px;
+}

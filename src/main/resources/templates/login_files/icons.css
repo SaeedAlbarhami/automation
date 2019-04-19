@@ -1,0 +1,105 @@
+/*****HEADER*****/
+.head_bell,
+.head_home {
+    width: 25px;
+    height: 42px;
+    background: url(../../images/icons.png) 0px 0px;
+    margin: auto;
+}
+
+    .head_home a {
+        display: block;
+        height: 42px;
+    }
+
+.head_bell {
+    width: 25px;
+    height: 42px;
+    background: url(../../images/icons.png) -26px 0px;
+    margin: auto;
+}
+
+.head_logout {
+    width: 25px;
+    height: 42px;
+    background: url(../../images/icons.png) -76px 0px;
+    margin: auto;
+    font-size: 0px;
+}
+
+    .head_logout a {
+        display: block;
+        height: 42px;
+        color: #2e506a;
+    }
+
+.dashbard_icon {
+    height: 51px;
+    width: 28px;
+    margin-right: 3px;
+    margin-left: 3px;
+    background: url(../../images/icons.png) 0px -43px;
+}
+
+.order_icon {
+    height: 51px;
+    width: 28px;
+    margin-right: 3px;
+    margin-left: 3px;
+    background: url(../../images/icons.png) -27px -43px;
+}
+
+.active_log_icon {
+    height: 51px;
+    width: 28px;
+    margin-right: 3px;
+    margin-left: 3px;
+    background: url(../../images/icons.png) -54px -43px;
+}
+
+.user_icon {
+    background: url(../../images/icons.png) -82px -43px #bababa;
+}
+
+.hom2_icon {
+    height: 51px;
+    width: 20px;
+    margin-right: 3px;
+    margin-left: 3px;
+    margin: auto;
+    background: url(../../images/icons.png) -123px -43px;
+}
+
+.bell2_icon {
+    height: 51px;
+    width: 20px;
+    margin-right: 3px;
+    margin-left: 3px;
+    margin: auto;
+    background: url(../../images/icons.png) -144px -43px;
+}
+/*****END HEADER*****/
+
+.comment_icon {
+    height: 18px;
+    width: 17px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url(../../images/icons.png) -14px -98px;
+}
+
+.modify_icon {
+    height: 17px;
+    width: 14px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url(../../images/icons.png) 0px -98px;
+}
+
+.delete_icon {
+    height: 17px;
+    width: 13px;
+    margin-right: 4px;
+    margin-left: 4px;
+    background: url(../../images/icons.png) -31px -98px;
+}

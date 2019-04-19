@@ -1,0 +1,341 @@
+.swMain {
+	position: relative;
+	display: block;
+	margin: 0;
+	padding: 0;
+	border: 0 solid #CCC;
+	overflow: visible;
+	width: 100%;
+}
+
+.stepFormSection label:nth-child(2) {
+    color: #a20000;
+    font-size: 10px;
+}
+#wizard lable,
+label#msg_JobStatusStep{
+	color: #a20000;
+    font-size: 10px;
+}
+.swMain .stepContainer {
+	display: block;
+	position: relative;
+	margin: 0;
+	padding: 0;
+	border: 0 solid #CCC;
+	overflow-x: hidden;
+	clear: both;
+	height: auto !important;
+    overflow: initial;
+}
+
+.swMain .stepContainer div.content {
+	display: block;
+	/*position: absolute;*/
+    position:relative;
+	float: left;
+	margin: 0;
+	padding: 5px;
+	height: auto;
+	overflow: visible;
+	z-index: 88;
+	width: 100%;
+	clear: both;
+}
+
+.swMain div.actionBar {
+	display: inline-block;
+    width: 100%;
+    position: relative;
+    clear: both;
+    margin: 10px 0 0 0;
+    border-top: 1px solid #CCC;
+    padding: 0;
+    color: #5A5655;
+    height: 40px;
+    text-align: left;
+    overflow: auto;
+    -moz-border-radius: 5px;
+    left: 0;
+}
+
+.swMain .stepContainer .StepTitle {
+	display: block;
+	position: relative;
+	margin: 0;
+	border: 1px solid #E0E0E0;
+	padding: 5px;
+	font: bold 16px Verdana, Arial, Helvetica, sans-serif;
+	color: #5A5655;
+	background-color: #E0E0E0;
+	clear: both;
+	text-align: left;
+	z-index: 88;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+.swMain ul.anchor {
+	position: relative;
+	display: block;
+	float: left;
+	list-style: none;
+	padding: 0;
+	width: 100%;
+	margin: 10px 0;
+	clear: both;
+	border: 0 solid #CCCCCC;
+	background: transparent;
+    z-index:1;
+	/*#EEEEEE */
+}
+
+.swMain ul.anchor li {
+	position: relative;
+	display: block;
+	margin: 0;
+	width: 25%;
+	float: right;
+	text-align: center;
+}
+
+.swMain ul.anchor li:before{
+	content: "";
+	width: 100%;
+	height: 1px;
+	background: #ccc;
+	left: 0;
+	top: 65%;
+    position: absolute;
+}
+
+/* Anchor Element Style */
+
+.swMain ul.anchor li a {
+	display: block;
+	position: relative;
+	margin: 5px 0 0 0;
+	padding: 3px;
+	height: 30px;
+	width: 30px;
+	margin: auto;
+	text-decoration: none;
+	outline-style: none;
+	border-radius: 50%;
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+}
+
+.swMain ul.anchor li a img{
+	position: absolute;
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 100%;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+
+.swMain ul.anchor li a.selected {
+	color: #F8F8F8;
+	background: #204d74;
+	/* EA8511 */
+	border: 1px solid #204d74;
+	cursor: text;
+}
+
+.swMain ul.anchor li a.selected:hover {
+	color: #fff;
+	background: #204d74;
+	border: 1px solid #204d74;
+}
+
+.swMain ul.anchor li a.done {
+	position: relative;
+	color: #FFF;
+	border: 1px solid #3a75a9;
+	z-index: 99;
+	background: url("../../../images/step_icons/done.png") no-repeat center center #3a75a9;
+}
+
+.swMain ul.anchor li a.done img{
+	display: none;
+}
+
+.swMain ul.anchor li a.done:hover {
+	color: #fff;
+	background: url("../../../images/step_icons/done.png") no-repeat center center #204d74;
+	border: 1px solid #204d74;
+}
+
+.swMain ul.anchor li a.disabled {
+	color: #CCCCCC;
+	background: #c1c1c1;
+	border: 1px solid #c1c1c1;
+	cursor: text;
+}
+
+.swMain ul.anchor li a.disabled:hover {
+	color: #CCCCCC;
+	background: #F8F8F8;
+}
+
+.swMain ul.anchor li a.error {
+	color: #6c6c6c !important;
+	background: url("../../../images/step_icons/error.png") no-repeat center center #f08f75 !important;
+	border: 1px solid #fb3500 !important;
+}
+
+    .swMain ul.anchor li a.error img {
+        display:none;
+    }
+
+.swMain ul.anchor li a.error:hover {
+	color: #000 !important;
+}
+
+.swMain .buttonNext {
+    width: 35px;
+    display: block;
+    float: left;
+    margin: 5px 3px 0 3px;
+    padding: 6px 15px;
+    text-indent: -100%;
+    overflow: hidden;
+    height: 30px;
+    border-radius: 3px;
+    text-decoration: none;
+    text-align: center;
+    color: #FFF;
+    outline-style: none;
+    background: url("../../../images/step_icons/stp_next.png") no-repeat center #204d74;
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+    text-indent: 200%;
+    font-size: 0px;
+}
+
+.swMain .buttonDisabled {
+	color: #fff !important;
+	background-color: #6c6c6c !important;
+	cursor: text;
+}
+
+.swMain .buttonPrevious {
+    width: 35px;
+    display: block;
+    float: left;
+    margin: 5px 3px 0 3px;
+    padding: 6px 15px;
+    text-indent: -100%;
+    overflow: hidden;
+    height: 30px;
+    border-radius: 3px;
+    text-decoration: none;
+    text-align: center;
+    color: #fff;
+    outline-style: none;
+    background: url("../../../images/step_icons/stp_pre.png") no-repeat center #3a75a9;
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+    text-indent: 200%;
+    font-size: 0px;
+}
+
+.swMain .buttonFinish {
+	display: block;
+	float: left;
+	margin: 5px 10px 0 3px;
+	padding: 5px;
+	text-decoration: none;
+	text-align: center;
+	width: 100px;
+	color: #FFF;
+	outline-style: none;
+	background-color: #204d74;
+	border: 1px solid #204d74;
+}
+
+
+/* Form Styles */
+
+.txtBox {
+	border: 1px solid #CCCCCC;
+	color: #5A5655;
+	font: 13px Verdana, Arial, Helvetica, sans-serif;
+	padding: 2px;
+	width: 430px;
+}
+
+.txtBox:focus {
+	border: 1px solid #EA8511;
+}
+
+.swMain .loader {
+	position: relative;
+	display: none;
+	float: left;
+	margin: 2px 0 0 2px;
+	padding: 8px 10px 8px 40px;
+	border: 1px solid #FFD700;
+	font: bold 13px Verdana, Arial, Helvetica, sans-serif;
+	color: #5A5655;
+	background: #FFF url(../../../images/loader.gif) no-repeat 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	z-index: 998;
+}
+
+.swMain .msgBox {
+	position: relative;
+	display: none;
+	float: right;
+	margin: 5px;
+	border: 1px solid #f6653e;
+	background-color: #f08f75;
+	font: normal 12px Verdana, Arial, Helvetica, sans-serif;
+	color: #fff;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	z-index: 999;
+	min-width: 200px;
+}
+
+.swMain .msgBox .content {
+	font: normal 13px Verdana, Arial, Helvetica, sans-serif;
+	padding: 0;
+	float: right;
+    padding: 5px;
+}
+
+.swMain .msgBox .close {
+	color: #fff;
+    display: block;
+    float: right;
+    margin: 3px;
+    outline-style: none;
+    padding: 3px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    opacity: 1;
+    font-size: 13px;
+
+}
+
+.swMain .msgBox .close:hover {
+	color: #ce5333;
+    text-shadow: 0 1px 0 #f9d4ca;
+}
+

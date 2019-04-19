@@ -1,0 +1,436 @@
+.accordion_box {
+	width: 23%;
+	height: 147px;
+	background: #fff;
+	float: right;
+	margin: 1%;
+	box-shadow: 0px 0px 1px #aeaeae;
+	box-sizing: border-box;
+	/*transition: all 0.5s ease;
+	-webkit-transition: all 0.5s ease;
+	-maz-transition: all 0.5s ease;
+	-ms-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;*/
+    position: relative;
+    overflow:hidden;
+    -webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.accordion_box:hover {
+	box-shadow: 0px 0px 1px #ccc;
+	/*
+	-webkit-box-shadow: inset 0px 0px 0px 80px rgba(236, 236, 236, 1);
+	-moz-box-shadow: inset 0px 0px 0px 80px rgba(236, 236, 236, 1);
+	box-shadow: inset 0px 0px 0px 80px rgba(236, 236, 236, 1);
+*/
+}
+
+.box_icon {
+	height: 90px;
+	text-align: center;
+	position: relative;
+}
+
+.box_icon img {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 100%;
+	margin: auto;
+}
+
+.accordion_box .dashboard_name {
+	text-align: center;
+    color: #ffffff;
+    background: #24628b;
+    height: 57px;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+	z-index: 1;
+    display:table;
+    transition: all 0.5s ease;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-ms-transition: all 0.5s ease;
+}
+.dashboard_name span {
+    display:table-cell;
+    vertical-align:middle;
+}
+
+.application_wrapper {
+	width: 100%;
+	margin: auto;
+/*	background: #f9f9f9;*/
+/*	border-radius: 3px;*/
+    box-shadow: 0px 0px 1px #ccc;
+	padding: 2%;
+	box-sizing: border-box;
+	transition: all 0.5s ease;
+	-webkit-transition: all 0.5s ease;
+	-maz-transition: all 0.5s ease;
+	-ms-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+}
+
+.application_wrapper:hover {
+	box-shadow: 0px 0px 1px #ccc;
+}
+
+.settings:after,
+.application_wrapper:after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+.application_wrapper h1 {
+	font-size: 15px;
+    /* padding-top: 10px; */
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #2e506a;
+    /* text-align: center; */
+}
+
+.application_col-left {
+	color: #757575;
+	font-weight: normal;
+}
+
+.application_col-left:before {
+	position: absolute;
+	content: "-";
+	left: 0;
+}
+.application_col-right{
+	text-align: left;
+}
+.application_box {
+    padding: 15px;
+    box-sizing: border-box;
+    padding-bottom: 35px
+}
+
+.application_box:after {
+    content:"";
+    display:block;
+    clear:both;
+}
+
+.application_box .red,
+.application_box .orange {
+	font-weight: bold;
+}
+
+.red {
+	color: #f05958;
+}
+
+.orange {
+	color: #ffb517;
+}
+
+.updatebtn input {
+	background: #a8c137;
+	border: none;
+	color: #fff;
+	border-radius: 3px;
+	padding: 8px 15px;
+}
+
+.updatebtn input:hover {
+	background: #B1D411;
+}
+
+.highcharts-background {
+	border-radius: 3px;
+}
+
+.dewa strong {
+	font-size: 20px;
+}
+
+.dewa input[type="submit"] {
+	background: #a8c137;
+	margin-top: 15px;
+}
+
+.dewa input[type="submit"]:hover {
+	background: #B1D411;
+}
+
+.chart {
+	overflow-x: auto;
+}
+
+
+/********************************************/
+
+#pie-canvas-holder {
+	width: 100%;
+	/*        margin-top: 50px;*/
+	text-align: center;
+}
+
+#chartjs-tooltip {
+	opacity: 1;
+	position: absolute;
+	background: rgba(0, 0, 0, .7);
+	color: white;
+	border-radius: 3px;
+	-webkit-transition: all .1s ease;
+	transition: all .1s ease;
+	pointer-events: none;
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+}
+
+.chartjs-tooltip-key {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+}
+
+.pie_chart_inwrapper {
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+.pie_chart_inwrapper h2 {
+	font-size: 17px;
+	font-weight: normal;
+}
+
+.pie_chart_inwrapper p {
+	font-size: 13px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.pie_chart_inwrapper:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+
+.pie_chart_box {
+	width: 100%;
+	margin: auto;
+}
+
+.white_bg,
+.project_summary_wrapper {
+/*	background: #fff;*/
+	padding: 10px;
+/*	border-radius: 5px;*/
+/*	border: 1px solid #dcdcdc;*/
+}
+
+.pie_chart_inwrapper ul li {
+	list-style: none;
+	height: 15px;
+	line-height: 15px;
+	margin-bottom: 5px;
+	font-size: 12px;
+	color: #484848;
+	margin-right: -40px;
+}
+
+.pie_chart_inwrapper ul li span {
+	display: block;
+	width: 15px;
+	height: 15px;
+	float: left;
+	margin-right: 3px;
+}
+
+
+
+/* ADDED BY SEAN */
+
+.under-label-star {
+    position: absolute;
+    right: -19px;
+    top: -30px;
+}
+
+
+
+/* ADDED BY SEAN 02/18/2018
+    * The next block of codes fixes the user interface issues on alignment and display of content for the supplier page
+    =================================================================*/
+
+/* Text Alignments Style */
+.xtext-left {
+    text-align: right !important;
+}
+
+.xtext-center {
+    text-align: center !important;
+}
+
+.xtext-right {
+    text-align: right !important;
+}
+/* Text Alignments Style End */
+
+.under-label {
+    position: relative;
+    display: block;
+    /*outline:1px dashed red;*/
+}
+
+
+.margin-bottom-8 {
+    margin-bottom: 7.5px !important;
+}
+
+.usertype-icon {
+    position: relative;
+    width: 35px;
+    margin-right: 10px;
+}
+
+.usertype-selection-container {
+    position: relative;
+    margin: 0 auto;
+    display: table;
+}
+
+
+    .usertype-selection-container div {
+        display: table-cell;
+        padding-left: 10px;
+        padding-right: 10px;
+        vertical-align: middle;
+    }
+
+.usertype-label {
+    position: relative;
+    /*top:10px;*/
+}
+
+    .usertype-label::before {
+        /*content: "You are a";
+        position: absolute;
+        left: 0px;
+        top: -18px;
+        font-size: 13px;*/
+    }
+
+
+.applyActiveBackground {
+    background: #fff7a0;
+}
+
+.write21 {
+    font-size: 21px !important;
+}
+
+
+.usertype-title {
+    margin-bottom: 10px;
+    text-align: start;
+}
+
+.radioContainerSupplier,
+.radioContainerContractor,
+.radioContainerConsultant {
+    padding-top: 15px;
+}
+
+.expireDateInput:focus + label,
+.registrationInput:focus + label {
+    bottom: 0 !important;
+}
+
+@media(max-width:991px) {
+
+    .usertype-selection-container {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+
+        .usertype-selection-container div {
+            display: block;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-bottom: 20px;
+        }
+}
+
+
+/* Temp Solution for Spacing */
+
+@media (min-width:992px) {
+    .license-number-position-fix {
+        margin-bottom: 16px !important;
+    }
+
+    .license-expiry-position-fix {
+        margin-bottom: -6px !important;
+    }
+
+    .license-tax-position-fix {
+        margin-bottom: 10px !important;
+    }
+
+    .license-bankname-position-fix {
+        margin-top: 22px !important;
+    }
+
+    .license-branch-position-fix {
+        margin-top: 47px !important;
+    }
+}
+/* Temp Solution for Spacing */
+
+
+/* UI DIALOG BOX STYLES */
+.ui-dialog {
+    min-width: 380px !important;
+    padding: 0 !important;
+    box-shadow: 3px 3px 10px #888 !important;
+    -o-box-shadow: 3px 3px 10px #888 !important;
+    -moz-box-shadow: 3px 3px 10px #888 !important;
+    -webkit-box-shadow: 3px 3px 10px #888 !important;
+}
+
+button.ui-button {
+    border-radius: 0 !important;
+    padding: 8px 21px !important;
+}
+
+.ui-dialog-content {
+    min-height: 90px !important;
+    padding: 15px 15px !important;
+}
+
+.ui-dialog .ui-icon-closethick {
+    background-position: 0 !important;
+    background-color: transparent !important;
+    background-image: url(../../../images/cancel.png) !important;
+}
+
+
+@media (max-width:420px) {
+    .ui-dialog {
+        min-width: 85% !important;
+    }
+}
+
+/* UI DIALOG BOX STYLES END */
+/* ADDED BY SEAN 02/18/2018 END
+    =================================================================*/

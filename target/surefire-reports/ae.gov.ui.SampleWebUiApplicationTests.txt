@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: ae.gov.ui.SampleWebUiApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.425 sec - in ae.gov.ui.SampleWebUiApplicationTests

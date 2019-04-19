@@ -1,0 +1,70 @@
+
+$(window).load(function () {
+
+    function playSound(el, soundfile) {
+
+        if (el.mp3) {
+            if (el.mp3.paused) el.mp3.play();
+            else el.mp3.pause();
+        } else {
+            el.mp3 = new Audio(soundfile);
+            el.mp3.play();
+        }
+    }
+
+    $(".img").click(function () {
+        $('.img').removeClass('visualCaptcha-selected');
+        $(this).addClass('visualCaptcha-selected');
+    });
+
+    $(".PalySound").click(function () {
+        
+        var IsPlay = $(".PalySound").hasClass("PalySound");
+        if (IsPlay) {
+            var scope = angular.element($(".captha_container")).scope();
+            scope.$apply(function () {
+                scope.ListenAudio('ar', $("#audioID").val(), this);
+            });
+            $(this).addClass("RemoveSound");
+            $(this).removeClass("PalySound");
+        }
+        else
+        {
+
+            $(this).addClass("PalySound");
+            $(this).removeClass("RemoveSound");
+        }
+       
+      
+    });
+    $(".RemoveSound").click(function () {
+        $(".RemoveSound").addClass("Playsound");
+        $(".RemoveSound").removeClass("RemoveSound");
+    });
+
+    $(".visualCaptcha-accessibility-button").click(function () {
+        $('.visualCaptcha-possibilities').toggleClass('visualCaptcha-hide');
+        $('.visualCaptcha-explanation').toggleClass('visualCaptcha-hide');
+        $('.accessibility-description').toggleClass('accessibility-description_show');
+        $('.audioField').toggleClass('audioField_show');
+
+
+    });
+    $(".visualCaptcha-accessibility-button").focus(function () {
+        $('.visualCaptcha-possibilities').toggleClass('visualCaptcha-hide');
+        $('.visualCaptcha-explanation').toggleClass('visualCaptcha-hide');
+        $('.accessibility-description').toggleClass('accessibility-description_show');
+        $('.audioField').toggleClass('audioField_show');
+    });
+
+    $(".visualCaptcha-refresh-button").click(function () {
+        $('.visualCaptcha-possibilities').removeClass('visualCaptcha-hide');
+        $('.visualCaptcha-explanation').removeClass('visualCaptcha-hide');
+        $('.accessibility-description').removeClass('accessibility-description_show');
+        $('.audioField').removeClass('audioField_show');
+    });
+
+});
+$(document).ready(function () {
+    // bind your jQuery events here initially
+});
