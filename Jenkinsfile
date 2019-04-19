@@ -70,7 +70,7 @@ pipeline {
                     if (branch != 'master') {
                         revision += "-${branch}"
                     }
-                    sh "${branch}"
+                    sh "echo ${branch}"
                     sh "echo 'Building revision: ${revision}'"
                 }
             }
