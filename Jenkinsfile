@@ -1,6 +1,6 @@
 properties([
     parameters(
-        [
+        [ 
         booleanParam(name: 'DEPLOY_BRANCH_TO_TST', defaultValue: false),
 
         text(name: 'Remarks', defaultValue: 'Release Manager', description: 'Why this pipeline is running?'),
@@ -70,6 +70,7 @@ pipeline {
                     if (branch != 'master') {
                         revision += "-${branch}"
                     }
+                    sh "${branch}"
                     sh "echo 'Building revision: ${revision}'"
                 }
             }
@@ -127,6 +128,7 @@ pipeline {
             }
         }
         stage ('Deploy The New Version Of The Application To K8S') {
+          
             when {
                 expression {
                     branch == 'master' || params.DEPLOY_BRANCH_TO_TST
