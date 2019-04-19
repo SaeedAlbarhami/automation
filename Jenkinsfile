@@ -48,8 +48,8 @@ pipeline {
                   mountPath: /var/run/docker.sock
               volumes:
               - name: repository
-                persistentVolumeClaim:
-                  claimName: jenkins
+                hostPath:
+                  path: /var/jenkins-repo
               - name: docker-sock
                 hostPath:
                   path: /var/run/docker.sock
