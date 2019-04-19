@@ -1,6 +1,6 @@
 properties([
     parameters(
-        [
+        [ 
         booleanParam(name: 'DEPLOY_BRANCH_TO_TST', defaultValue: false),
 
         text(name: 'Remarks', defaultValue: 'Release Manager', description: 'Why this pipeline is running?'),
