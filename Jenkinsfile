@@ -128,7 +128,7 @@ pipeline {
             }
         }
         stage ('Deploy The New Version Of The Application To K8S') {
-            echo branch
+          
             when {
                 expression {
                     branch == 'master' || params.DEPLOY_BRANCH_TO_TST
