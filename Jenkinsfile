@@ -46,6 +46,13 @@ pipeline {
                 volumeMounts:
                 - name: docker-sock
                   mountPath: /var/run/docker.sock
+              - name: kubectl
+                image: lachlanevenson/k8s-kubectl:v1.4.8
+                command: ["cat"]
+                tty: true
+                volumeMounts:
+                - name: k8s-kubectl
+                  mountPath: /var/k8s-kubectl
               volumes:
               - name: repository
                 hostPath:
@@ -53,6 +60,9 @@ pipeline {
               - name: docker-sock
                 hostPath:
                   path: /var/run/docker.sock
+              - name: k8s-kubectl
+                hostPath:
+                  path: /var/k8s-kubectl              
             """
         }
     }
