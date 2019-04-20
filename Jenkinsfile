@@ -9,7 +9,7 @@ properties([
 
         password(name: 'DOCKER_PASS', defaultValue: '******', description: 'Enter a password'),
 
-        choice(name: 'CHOICE', choices: ['Build Only', 'Build & Deploy to QA', 'Build & Deploy to QA & Prod'], description: 'Attention Please'),
+        choice(name: 'CHOICE', choices: ['Continuous Integration', 'Build & Deploy to QA', 'Build & Deploy Production'], description: 'Attention Please'),
        
     ])
 
@@ -104,17 +104,7 @@ pipeline {
                 }
             }
         }
-        stage ('Building Container Image') {
-            steps {
-                container('docker') {
-                    script {
-                        registryIp = 'saeedalbarhami'
-                        sh "docker build . -t ${registryIp}/automation:${revision} --build-arg REVISION=${revision}"
-                    }
-                }
-            }
-                }
-        stage ('publish Container Image') {
+        stage ('Building & Pushing Container Image') {
             when {
                 expression {
                     branch == 'master' || params.DEPLOY_BRANCH_TO_TST
@@ -122,11 +112,16 @@ pipeline {
             }
             steps {
                 container('docker') {
-                    sh "docker login -u ${params.DOCKER_USER} -p ${params.DOCKER_PASS}"
-                    sh "docker push ${registryIp}/automation:${revision}"
+                    script {
+                        registryIp = 'saeedalbarhami'
+                        sh "docker build . -t ${registryIp}/automation:${revision} --build-arg REVISION=${revision}"
+                        sh "docker login -u ${params.DOCKER_USER} -p ${params.DOCKER_PASS}"
+                        sh "docker push ${registryIp}/automation:${revision}"
+                    }
                 }
             }
-        }
+         }
+      
         stage ('Deploy The New Version Of The Application To K8S') {
           
             when {
