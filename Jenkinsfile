@@ -140,7 +140,11 @@ pipeline {
                 }
             }
             steps {
-                
+                container('kubectl')
+                {
+                    sh "kubectl version"
+                    sh "kubectl run auto --image=${registryIp}/automation:${revision}"
+                }
                  echo 'Thank you '
             }
         }
