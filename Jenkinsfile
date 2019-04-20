@@ -15,6 +15,23 @@ properties([
 
 ])
 
+/*
+    Helm install
+ */
+def helmInstall (namespace, release) {
+    echo "Installing ${release} in ${namespace}"
+
+    script {
+        release = "${release}-${namespace}"
+        sh "helm repo add helm ${HELM_REPO}; helm repo update"
+        sh """
+            helm upgrade --install --namespace ${namespace} ${release} \
+                --set image.repository=${registryIp}/automation,image.tag=${revision} helm/acme
+        """
+        sh "sleep 5"
+    }
+}
+
 def branch
 def revision
 def registryIp
@@ -143,7 +160,11 @@ pipeline {
                 container('kubectl')
                 {
                     sh "kubectl version"
-                    sh "kubectl run auto --image=${registryIp}/automation:${revision}"
+                    // Deploy with helm
+                    echo "Deploying"
+                    helmInstall("cicd", "MYID")
+                    
+                   
                 }
                  echo 'Thank you '
             }
