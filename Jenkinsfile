@@ -123,7 +123,7 @@ pipeline {
             steps {
                 container('docker') {
                     sh "docker login -u ${params.DOCKER_USER} -p ${params.DOCKER_PASS}"
-                    sh "docker push ${registryIp}/demo1:${revision}"
+                    sh "docker push ${registryIp}/automation:${revision}"
                 }
             }
         }
