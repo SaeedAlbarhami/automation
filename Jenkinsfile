@@ -162,9 +162,8 @@ pipeline {
                     sh "kubectl version"
                     // Deploy with helm
                     echo "Deploying"
-                    helmInstall("cicd", "MYID")
                     
-                   
+                                       
                 }
                  echo 'Thank you '
             }
