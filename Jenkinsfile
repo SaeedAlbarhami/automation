@@ -1,41 +1,12 @@
-properties([
-    parameters(
-        [ 
-        booleanParam(name: 'DEPLOY_BRANCH_TO_TST', defaultValue: false),
+library('pipelines-configuration')
 
-        text(name: 'Remarks', defaultValue: 'Release Manager', description: 'Why this pipeline is running?'),
-
-        string(name: 'DOCKER_USER', defaultValue: 'saeedalbarhami', description: 'Enter user info docker hub'),
-
-        password(name: 'DOCKER_PASS', defaultValue: '******', description: 'Enter a password'),
-
-        choice(name: 'CHOICE', choices: ['Continuous Integration', 'Build & Deploy to QA', 'Build & Deploy Production'], description: 'Attention Please'),
-       
-    ])
-
-])
-
-/*
-    Helm install
- */
-def helmInstall (namespace, release) {
-    echo "Installing ${release} in ${namespace}"
-
-    script {
-        release = "${release}-${namespace}"
-        sh "helm repo add helm ${HELM_REPO}; helm repo update"
-        sh """
-            helm upgrade --install --namespace ${namespace} ${release} \
-                --set image.repository=${registryIp}/automation,image.tag=${revision} helm/acme
-        """
-        sh "sleep 5"
-    }
-}
-
-def branch
-def revision
-def registryIp
-
+def container_image = "400493355003.dkr.ecr.us-west-2.amazonaws.com/automation"
+def helm_chart = "automation"
+def namespace = "default"
+def branch="master"
+def revision =''
+def env ='qa'
+def sourcecodeurl= 'https://github.com/SaeedAlbarhami/automation'
 pipeline {
         agent {
         kubernetes {
@@ -70,6 +41,13 @@ pipeline {
                 volumeMounts:
                 - name: k8s-kubectl
                   mountPath: /var/k8s-kubectl
+              - name: helm
+                image: linkyard/concourse-helm-resource
+                command: ["cat"]
+                tty: true
+                volumeMounts:
+                - name: concourse-helm-resource
+                  mountPath: /var/concourse-helm-resource  
               volumes:
               - name: repository
                 hostPath:
@@ -79,48 +57,30 @@ pipeline {
                   path: /var/run/docker.sock
               - name: k8s-kubectl
                 hostPath:
-                  path: /var/k8s-kubectl              
+                  path: /var/k8s-kubectl      
+              - name: concourse-helm-resource
+                hostPath:
+                  path: /var/concourse-helm-resource                   
             """
         }
     }
     options {
         skipDefaultCheckout true
     }
-
     stages {
         stage ('Checking Out The Latest Changes') {
             steps {
                 script {
-                    def repo = checkout scm
-                    revision = sh(script: 'git log -1 --format=\'%h.%ad\' --date=format:%Y%m%d-%H%M | cat', returnStdout: true).trim()
-                    branch = repo.GIT_BRANCH.take(20).replaceAll('/', '_')
-                    if (branch != 'master') {
-                        revision += "-${branch}"
-                    }
-                    sh "echo ${branch}"
-                    sh "echo 'Building revision: ${revision}'"
+                    revision=clone.getsourcecode(sourcecodeurl, branch) 
                 }
             }
-
-        }
-        stage ('Clean & Compile The Code') {
+        } 
+        stage ('Clean, Test & Compile The Code') {
             steps {
                 container('maven') {
                     sh 'mvn clean compile'
-                }
-            }
-        }
-        stage ('Running Unit Tests - SonarQube') {
-            steps {
-                container('maven') {
-                    sh 'mvn sonar:sonar  -Dsonar.projectKey=automation1  -Dsonar.host.url=http://10.100.96.224:9000 -Dsonar.login=cd38448ccd16b8afb53b054f7e3217fa5ceb5ea6'
-                }
-            }
-        }
-        stage ('Running Integration Tests') {
-            steps {
-                container ('maven') {
-                    sh 'mvn verify'
+                    sh 'mvn test'
+                    sh 'mvn clean verify'	
                 }
             }
         }
@@ -132,41 +92,20 @@ pipeline {
             }
         }
         stage ('Building & Pushing Container Image') {
-            when {
-                expression {
-                    branch == 'master' || params.DEPLOY_BRANCH_TO_TST
-                }
-            }
             steps {
-                container('docker') {
-                    script {
-                        registryIp = 'saeedalbarhami'
-                        sh "docker build . -t ${registryIp}/automation:${revision} --build-arg REVISION=${revision}"
-                        sh "docker login -u ${params.DOCKER_USER} -p ${params.DOCKER_PASS}"
-                        sh "docker push ${registryIp}/automation:${revision}"
+                script
+                    {
+                       container_package.build_push(container_image, revision)
                     }
-                }
-            }
-         }
-      
-        stage ('Deploy The New Version Of The Application To K8S') {
-          
-            when {
-                expression {
-                    branch == 'master' || params.DEPLOY_BRANCH_TO_TST
-                }
-            }
+             }
+         }        
+       stage ('HELM Deployment') {
             steps {
-                container('kubectl')
-                {
-                    sh "kubectl version"
-                    // Deploy with helm
-                    echo "Deploying"
-                    
-                                       
+                script
+                   {
+                       helm.install_upgrade(helm_chart, revision, namespace, env)
+                   }
                 }
-                 echo 'Thank you '
             }
         }
-    }
 }
