@@ -113,7 +113,7 @@ pipeline {
         stage ('Running Unit Tests - SonarQube') {
             steps {
                 container('maven') {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=automation -Dsonar.host.url=http://10.100.96.224:9000  -Dsonar.login=69cf09d0cd7136a5f739c432ed0331ae5490306d'
+                    sh 'mvn verify sonar:sonar  -Dsonar.projectKey=SaeedAlbarhami_automation  -Dsonar.organization=saeedalbarhami  -Dsonar.host.url=https://sonarcloud.io  -Dsonar.login=7d9ba192edb3936d08a729cf79d05c7c5a4c5bc2'
                 }
             }
         }
