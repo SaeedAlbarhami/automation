@@ -1,6 +1,6 @@
 library('pipelines-configuration')
 
-def container_image = "400493355003.dkr.ecr.us-west-2.amazonaws.com/automation"
+def container_image = "automation"
 def helm_chart = "automation"
 def namespace = "default"
 def branch="master"
