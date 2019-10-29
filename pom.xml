@@ -9,8 +9,8 @@
 	</parent>
 	<artifactId>automation</artifactId>
 	<groupId>ae.gov</groupId>
-	<name>Spring Boot Web UI Sample</name>
-	<description>Spring Boot Web UI Sample</description>
+	<name>Automaion</name>
+	<description>Automation Description</description>
 	<version>${revision}</version>
 	<url>http://projects.spring.io/spring-boot/</url>
 	<organization>
