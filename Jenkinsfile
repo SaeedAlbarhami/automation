@@ -75,15 +75,6 @@ pipeline {
                 }
             }
         } 
-        stage ('Clean, Test & Compile The Code') {
-            steps {
-                container('maven') {
-                    sh 'mvn clean compile'
-                    sh 'mvn test'
-                    sh 'mvn clean verify'	
-                }
-            }
-        }
         stage ('Building Artifact') {
             steps {
                 container('maven') {
