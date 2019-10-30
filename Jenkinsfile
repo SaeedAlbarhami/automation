@@ -75,6 +75,21 @@ pipeline {
                 }
             }
         } 
+      stage ('Clean, Test & Compile The Code') {
+            steps {
+                container('maven') {
+                    sh 'mvn clean compile'
+                    sh 'mvn test'
+                }
+            }
+        }
+       stage ('Sonarqube Scanning') {
+            steps {
+                container('maven') {
+                    sh 'mvn verify'
+                }
+            }
+        }
         stage ('Building Artifact') {
             steps {
                 container('maven') {
