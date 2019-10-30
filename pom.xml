@@ -8,7 +8,7 @@
 		<version>1.0.2.RELEASE</version>
 	</parent>
 	<artifactId>automation</artifactId>
-	<groupId>ae.gov</groupId>
+	<groupId>ae.gov</groupId> 
 	<name>Automaion</name>
 	<description>Automation Description</description>
 	<version>${revision}</version>
